@@ -1,8 +1,13 @@
 class Bitmap
-  attr_accessor :font
+  attr_accessor :font, :entity
 
   def initialize(width, height=nil)
-
+    @entity = if width.is_a? String
+      filename = width
+      SDL::Surface.load(RGSS.get_file(filename)).display_format_alpha
+    else
+      SDL::Surface.new(SDL::SWSURFACE, width, height, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff)
+    end
   end
 
   def dispose
@@ -14,11 +19,11 @@ class Bitmap
   end
 
   def width
-
+    @entity.w
   end
 
   def height
-
+    @entity.h
   end
 
   def rect

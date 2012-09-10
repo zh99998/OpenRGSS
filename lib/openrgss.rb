@@ -1,1 +1,1 @@
-require_relative 'openrgss/openrgss'
+require_relative 'openrgss/rgss'
