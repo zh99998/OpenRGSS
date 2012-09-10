@@ -1,0 +1,3 @@
+class RGSSReset < Exception
+
+end
