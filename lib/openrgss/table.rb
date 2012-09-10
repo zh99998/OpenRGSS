@@ -1,4 +1,3 @@
-#by 花晴兰
 class Table
   attr_accessor :xsize, :ysize, :zsize, :size
 
