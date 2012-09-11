@@ -24,7 +24,7 @@ class Color
   end
 
   def to_s()
-    sprintf("(%f, %f, %f, %f)", @red, @blue, @green, @alpha)
+    "(#{@red}, #{@blue}, #{@green}, #{@alpha})"
   end
 
   def _dump(depth = 0)

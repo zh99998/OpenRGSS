@@ -5,7 +5,8 @@ module Audio
     end
 
     def bgm_play(filename, volume=100, pitch=100, pos=0)
-
+      SDL::Mixer.set_volume_music(volume)
+      SDL::Mixer.fade_in_music SDL::Mixer::Music.load(RGSS.get_file(filename)), -1, 800
     end
 
     def bgm_stop

@@ -1,14 +1,17 @@
 require 'sdl'
-
+require 'logger'
 module RGSS
   Autoload_Extname = ['.png', '.jpg', '.gif', '.bmp', '.ogg', '.wma', '.mp3', '.wav', '.mid']
+  Log = Logger.new(STDOUT)
   class <<self
     attr_reader :title
     attr_accessor :load_path
     attr_accessor :rgss_version
+    attr_accessor :log
 
     def title=(title)
-
+      @title = title
+      SDL::WM.set_caption(title, "#{title} - OpenRGSS Player")
     end
 
     def get_file(filename)
@@ -26,6 +29,8 @@ module RGSS
     def init
       SDL.init SDL::INIT_EVERYTHING
       Graphics.entity = SDL::Screen.open(Graphics.width, Graphics.height, 0, SDL::HWSURFACE)
+      SDL::Mixer.open(SDL::Mixer::DEFAULT_FREQUENCY, SDL::Mixer::DEFAULT_FORMAT, SDL::Mixer::DEFAULT_CHANNELS, 1536)
+      self.title = @title
     end
   end
   @load_path = []
