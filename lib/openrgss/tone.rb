@@ -23,6 +23,21 @@ class Tone
     @gray = [[0, value].max, 255].min
   end
 
+  def set(red, green=0, blue=0, gray=0)
+    if red.is_a? Tone
+      tone = red
+      @red = tone.red
+      @green = tone.green
+      @blue = tone.blue
+      @gray = tone.gray
+    else
+      @red = red
+      @green = green
+      @blue = blue
+      @gray = gray
+    end
+  end
+
   def blend(tone)
     self.clone.blend!(tone)
   end

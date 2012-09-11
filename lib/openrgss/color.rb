@@ -7,11 +7,19 @@ class Color
     @alpha = alpha
   end
 
-  def set(red, blue, green, alpha = 255)
-    @red = red
-    @blue = blue
-    @green = green
-    @alpha = alpha
+  def set(red, blue=0, green=0, alpha = 255)
+    if red.is_a? Color
+      color = red
+      @red = color.red
+      @blue = color.blue
+      @green = color.green
+      @alpha = color.alpha
+    else
+      @red = red
+      @blue = blue
+      @green = green
+      @alpha = alpha
+    end
     return self
   end
 

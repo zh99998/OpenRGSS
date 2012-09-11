@@ -8,6 +8,7 @@ class Bitmap
     else
       SDL::Surface.new(SDL::SWSURFACE, width, height, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff)
     end
+    @font = Font.new
   end
 
   def dispose

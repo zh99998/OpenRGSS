@@ -2,13 +2,22 @@
 #by kissye http://bbs.66rpg.com/thread-100857-1-1.html
 
 class Window
+
+  attr_accessor :padding, :padding_bottom, :tone, :arrows_visible
+
   #常量,self.contents距离上下左右的距离
   Contentsx4864636 = 16
   Contentsy1687869 = 16
   #---------------------------------------------------------------------------
   #
   #---------------------------------------------------------------------------
-  def initialize(viewport = nil)
+  def initialize(x=0, y=0, width=0, height=0)
+    if x.is_a? Viewport
+      viewport = x
+      x=0
+    else
+      viewport = nil
+    end
     @spritewindow5486154 = Sprite.new(viewport) #窗口背景块
     @spritewindow156486156 = Sprite.new(viewport) #窗口背景边框
     @spritecontents5486413 = Contents.new(32, 32, 32, 32, viewport) #self.contents图块
@@ -23,8 +32,8 @@ class Window
     @spritemove18516315.bitmap = Bitmap.new(32, 32)
     @width4863163 = 32 #宽度
     @height156468546 = 32 #高度
-    x = 0
-    y = 0
+                                                #x = 0
+                                                #y = 0
     @openness486163 = 255
     @cursor_rect486864131 = Rect.new(0, 0, 0, 0) #光标矩形
     @active468463453 = true
@@ -36,6 +45,27 @@ class Window
     @oxr48641651 = false #contents右边内容是否超出
     @oyl156489651 = false #contents上边内容是否超出
     @oyr4864164648 = false #contents下边内容是否超出
+
+    self.x = x
+    self.y = y
+    self.width = width
+    self.height = height
+    @tone = Tone.new
+  end
+
+  def open?
+    openness == 255
+  end
+
+  def close?
+    openness == 0
+  end
+
+  def move(x, y, width, height)
+    self.x = x
+    self.y = y
+    self.width = width
+    self.height = height
   end
 
   #--------------------------------------------------------------------------
@@ -590,18 +620,18 @@ class Window
         @count48564163 = 0
         #@pausecount468416决定当前显示的停顿图形,我顺带用来一起决定光标透明度了
         case @pausecount468416
-          when 1
-            rectbitmap = Rect.new(96, 64, 16, 16)
-            opa = 120
-          when 2
-            rectbitmap = Rect.new(112, 64, 16, 16)
-            opa = 200
-          when 3
-            rectbitmap = Rect.new(96, 80, 16, 16)
-            opa = 255
-          when 4
-            rectbitmap = Rect.new(112, 80, 16, 16)
-            opa = 200
+        when 1
+          rectbitmap = Rect.new(96, 64, 16, 16)
+          opa = 120
+        when 2
+          rectbitmap = Rect.new(112, 64, 16, 16)
+          opa = 200
+        when 3
+          rectbitmap = Rect.new(96, 80, 16, 16)
+          opa = 255
+        when 4
+          rectbitmap = Rect.new(112, 80, 16, 16)
+          opa = 200
         end
         #刷新光标透明度
         if active
