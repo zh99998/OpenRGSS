@@ -1,24 +1,24 @@
 class Color
 
   def initialize(red=0, blue=0, green=0, alpha = 255)
-    @red   = red.round
-    @blue  = blue.round
-    @green = green.round
-    @alpha = alpha.round
+    @red   = red
+    @blue  = blue
+    @green = green
+    @alpha = alpha
   end
 
   def set(red, blue=0, green=0, alpha = 255)
     if red.is_a? Color
       color  = red
-      @red   = color.red.round
-      @blue  = color.blue.round
-      @green = color.green.round
-      @alpha = color.alpha.round
+      @red   = color.red
+      @blue  = color.blue
+      @green = color.green
+      @alpha = color.alpha
     else
-      @red   = red.round
-      @blue  = blue.round
-      @green = green.round
-      @alpha = alpha.round
+      @red   = red
+      @blue  = blue
+      @green = green
+      @alpha = alpha
     end
     return self
   end
@@ -36,19 +36,19 @@ class Color
   end
 
   def red=(val)
-    @red = [[0, val].max, 255].min.to_f
+    @red = [[0, val].max, 255].min
   end
 
   def blue=(val)
-    @blue = [[0, val].max, 255].min.to_f
+    @blue = [[0, val].max, 255].min
   end
 
   def green=(val)
-    @green = [[0, val].max, 255].min.to_f
+    @green = [[0, val].max, 255].min
   end
 
   def alpha=(val)
-    @alpha = [[0, val].max, 255].min.to_f
+    @alpha = [[0, val].max, 255].min
   end
 
   def ==(other)

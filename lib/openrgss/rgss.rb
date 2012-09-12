@@ -40,9 +40,16 @@ module RGSS
       SDL::Mixer.open(SDL::Mixer::DEFAULT_FREQUENCY, SDL::Mixer::DEFAULT_FORMAT, SDL::Mixer::DEFAULT_CHANNELS, 1536)
       SDL::TTF.init
       self.title = @title
+    end
 
-      @show_fps           = true
-      Graphics.frame_rate = 120
+    def show_fps=(show_fps)
+      if show_fps
+        SDL::WM.set_caption("#{title} - #{Graphics.real_fps}fps", title)
+      else
+        SDL::WM.set_caption(title, title)
+      end
+
+      @show_fps = show_fps
     end
 
     def update
@@ -66,7 +73,12 @@ module RGSS
 
   def rgss_main
     RGSS.init
-    yield
+    begin
+      yield
+    rescue RGSSReset
+      RGSS.resources.clear
+      retry
+    end
   end
 
   def rgss_stop
@@ -126,8 +138,8 @@ module RGSS
     end
 
     def dispose
-      @disposed    = true
-      self.visible = false
+      @disposed = true
+      RGSS.resources.delete self
     end
 
     def visible=(visible)
