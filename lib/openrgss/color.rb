@@ -1,24 +1,24 @@
 class Color
 
   def initialize(red=0, blue=0, green=0, alpha = 255)
-    @red   = red
-    @blue  = blue
-    @green = green
-    @alpha = alpha
+    @red   = red.round
+    @blue  = blue.round
+    @green = green.round
+    @alpha = alpha.round
   end
 
   def set(red, blue=0, green=0, alpha = 255)
     if red.is_a? Color
       color  = red
-      @red   = color.red
-      @blue  = color.blue
-      @green = color.green
-      @alpha = color.alpha
+      @red   = color.red.round
+      @blue  = color.blue.round
+      @green = color.green.round
+      @alpha = color.alpha.round
     else
-      @red   = red
-      @blue  = blue
-      @green = green
-      @alpha = alpha
+      @red   = red.round
+      @blue  = blue.round
+      @green = green.round
+      @alpha = alpha.round
     end
     return self
   end

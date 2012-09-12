@@ -15,10 +15,11 @@ module RGSS
     attr_accessor :rgss_version
     attr_accessor :resources
     attr_accessor :log
+    attr_accessor :show_fps
 
     def title=(title)
       @title = title
-      SDL::WM.set_caption(title, "#{title} - OpenRGSS Player")
+      SDL::WM.set_caption(title, title)
     end
 
     def get_file(filename)
@@ -39,9 +40,17 @@ module RGSS
       SDL::Mixer.open(SDL::Mixer::DEFAULT_FREQUENCY, SDL::Mixer::DEFAULT_FORMAT, SDL::Mixer::DEFAULT_CHANNELS, 1536)
       SDL::TTF.init
       self.title = @title
+
+      @show_fps           = true
+      Graphics.frame_rate = 120
     end
 
     def update
+      if @show_fps and @fps != Graphics.real_fps
+        SDL::WM.set_caption("#{title} - #{Graphics.real_fps}fps", title)
+        @fps = Graphics.real_fps
+      end
+
       while event = SDL::Event.poll
         case event
         when SDL::Event::Quit
@@ -49,7 +58,7 @@ module RGSS
         when SDL::Event::KeyDown, SDL::Event::KeyUp
           Input.events << event
         else #when
-          Log.debug "unhandled event: #{event}"
+             #Log.debug "unhandled event: #{event}"
         end
       end
     end
