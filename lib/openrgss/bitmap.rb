@@ -30,7 +30,7 @@ class Bitmap
   end
 
   def rect
-
+    Rect.new(0, 0, width, height)
   end
 
   def blt(x, y, src_bitmap, src_rect, opacity=255)
@@ -53,7 +53,7 @@ class Bitmap
     @entity.fill_rect(x, y, width, height, color.alpha<<24|color.red<<16|color.green<<8|color.blue)
   end
 
-  def defgradient_fill_rect(x, y, width, height=false, color1=nil, color2=nil, vertical=false)
+  def gradient_fill_rect(x, y, width, height=false, color1=nil, color2=nil, vertical=false)
 
   end
 
@@ -96,10 +96,10 @@ class Bitmap
       width  = rect.width
       height = rect.height
     end
-    @font.entity.draw_solid_utf8(@entity, str, x, y, @font.color.red, @font.color.green, @font.color.blue)
+    @font.entity.draw_solid_utf8(@entity, str.to_s, x, y, @font.color.red, @font.color.green, @font.color.blue)
   end
 
   def text_size(str)
-
+    Rect.new 0, 0, *@font.entity.text_size(str)
   end
 end

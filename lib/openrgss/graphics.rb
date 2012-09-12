@@ -1,4 +1,5 @@
 module Graphics
+  @frame_rate = 60
   class <<self
     attr_reader :width, :height
     attr_accessor :entity
@@ -37,7 +38,9 @@ module Graphics
     end
 
     def snap_to_bitmap
-
+      result = Bitmap.new(@width, @height)
+      result.entity.put @entity, 0, 0
+      result
     end
 
     def frame_reset

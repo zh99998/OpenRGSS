@@ -10,16 +10,17 @@ class Rect
   end
 
   def set(x, y=0, width=0, height=0)
+
     if x.is_a? Rect
-      rect = x
-      @x = rect.x
-      @y = rect.y
-      @width = rect.width
+      rect    = x
+      @x      = rect.x
+      @y      = rect.y
+      @width  = rect.width
       @height = rect.height
     else
-      @x = x
-      @y = y
-      @width = width
+      @x      = x
+      @y      = y
+      @width  = width
       @height = height
     end
   end

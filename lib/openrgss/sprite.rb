@@ -13,6 +13,8 @@ class Sprite
     @zoom_y      = 1
     @angle       = 0
     @src_rect    = Rect.new
+    @color       = Color.new
+    @tone        = Tone.new
     self.visible = true
 
   end

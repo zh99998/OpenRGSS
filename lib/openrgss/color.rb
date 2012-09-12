@@ -8,8 +8,6 @@ class Color
   end
 
   def set(red, blue=0, green=0, alpha = 255)
-    p red, blue, green, alpha
-    puts caller
     if red.is_a? Color
       color  = red
       @red   = color.red

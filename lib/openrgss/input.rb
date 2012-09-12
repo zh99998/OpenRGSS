@@ -34,22 +34,17 @@ module Input
 
     def update
       RGSS.update
-      status = {}
+      @status.each { |key, value| @status[key] = value.next }
       events.each do |event|
         key = Entities[event.sym]
         Log.debug('key') { event }
         if event.press
-          if status.has_key?(key) and status[key].nil? or @status[key].nil?
-            status[key] = 0
-          else
-            status[key] = @status[key].next
-          end
+          @status[key] = 0
         else
-          status[key] = nil
+          @status.delete key
         end
       end
       events.clear
-      @status = status
     end
 
     def press?(sym)
@@ -57,11 +52,11 @@ module Input
     end
 
     def trigger?(sym)
-      @status[sym].zero?
+      @status[sym] and @status[sym].zero?
     end
 
     def repeat?(sym)
-      p trigger?(sym) or (@status[sym] > 10 and (@status[sym] % 4).zero?)
+      @status[sym] and (@status[sym].zero? or (@status[sym] > 10 and (@status[sym] % 4).zero?))
     end
 
     def dir4

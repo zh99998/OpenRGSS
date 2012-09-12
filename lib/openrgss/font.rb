@@ -65,12 +65,15 @@ class Font
   #------------------------------------------------------------------------
   # * Öffentliche Variablen
   #------------------------------------------------------------------------
-  attrs = [:name, :size, :bold, :italic, :color, :outline, :shadow, :out_color]
-  attr_accessor *attrs
-  attrs.each { |name|
-    class_eval("def default_#{name}; @@default_#{name}; end")
-    class_eval("def default_#{name}=(val); @@default_#{name}=val; end")
-  }
+  attr_accessor :name, :size, :bold, :italic, :color, :outline, :shadow, :out_color
+
+  class <<self
+    [:name, :size, :bold, :italic, :color, :outline, :shadow, :out_color].each { |attribute|
+      name = 'default_' + attribute.to_s
+      define_method(name) { class_variable_get('@@'+name) }
+      define_method(name+'=') { |value| class_variable_set('@@'+name, value) }
+    }
+  end
   #------------------------------------------------------------------------
   # * Standard Einstellungen aus der RGSS102E.dll.
   #------------------------------------------------------------------------

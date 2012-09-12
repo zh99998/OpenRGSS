@@ -2,12 +2,14 @@
 # by kissye http://bbs.66rpg.com/thread-104661-1-1.html
 
 class Tilemap
-  FBLX = 544 #x方向分辨率
-  FBLY = 416 #y方向分辨率
+
+  attr_accessor :flags
+  FBLX  = 544 #x方向分辨率
+  FBLY  = 416 #y方向分辨率
   SIZEX = 32
   SIZEY = 32
-  ANI = 25 #动画等待桢数
-             #以下画元件用
+  ANI   = 25  #动画等待桢数
+              #以下画元件用
   RECT1 = [Rect.new(0, 32, 16, 16), Rect.new(16, 32, 16, 16),
            Rect.new(32, 32, 16, 16), Rect.new(48, 32, 16, 16),
            Rect.new(0, 48, 16, 16), Rect.new(16, 48, 16, 16),
@@ -43,7 +45,7 @@ class Tilemap
            [10, 9, 14, 13], [8, 9, 12, 13], [2, 1, 14, 13], [0, 1, 12, 13],
            [10, 11, 14, 15], [4, 7, 12, 15], [2, 3, 14, 15], [0, 3, 12, 15]]
   LIST3 = [[2, 1, 6, 5], [0, 1, 4, 5], [2, 3, 6, 7], [0, 3, 4, 7]]
-             #----------------------------------------------------------------------------
+                          #----------------------------------------------------------------------------
   attr_accessor :bitmaps
   attr_accessor :viewport
   attr_reader :ox
@@ -52,25 +54,25 @@ class Tilemap
   attr_reader :passages
   attr_reader :count
   attr_reader :flash_data #不知道这个做什么用的
-             #----------------------------------------------------------------------------
+                          #----------------------------------------------------------------------------
   def initialize(viewport = nil)
     @shadow = Bitmap.new(SIZEX, SIZEY)
     @shadow.fill_rect(0, 0, 17, SIZEY, Color.new(0, 0, 0, 120)) #阴影
-    @viewport = viewport
-    @bitmaps = []
-    @backs = {} #元件精灵
-    @backbitmap = {} #元件图块
-    @switches = {} #动画开关
-    @count = 0 #当前显示动画
-    @count1 = 0 #等待桢数
-    @visible = true
-    @ox = 0
-    @oy = 0
-    @lastox = 0
-    @lastoy = 0
+    @viewport   = viewport
+    @bitmaps    = []
+    @backs      = {}                                            #元件精灵
+    @backbitmap = {}                                            #元件图块
+    @switches   = {}                                            #动画开关
+    @count      = 0                                             #当前显示动画
+    @count1     = 0                                             #等待桢数
+    @visible    = true
+    @ox         = 0
+    @oy         = 0
+    @lastox     = 0
+    @lastoy     = 0
   end
 
-             #----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   def dispose
     for i in @backbitmap.values
       i.dispose
@@ -81,12 +83,12 @@ class Tilemap
     @shadow.dispose
   end
 
-             #---------------------------------------------------------------------------
+  #---------------------------------------------------------------------------
   def disposed?
     return @shadow.disposed?
   end
 
-             #---------------------------------------------------------------------------
+  #---------------------------------------------------------------------------
   def map_data=(value)
     @map_data = value
     #如果地图太大,按ESC打开菜单后返回地图太慢,下面这段循环可以不要
@@ -118,7 +120,7 @@ class Tilemap
     end
   end
 
-             #--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
   def refreshox
     #需要释放掉的图块
     rangej = (@lastoy / SIZEY - 1)..((@lastoy + FBLY) / SIZEY)
@@ -141,7 +143,7 @@ class Tilemap
     if @ox >= (@map_data.xsize * SIZEX - FBLX)
       for i in @backs.keys
         @backs[i].ox = 0
-        @backs[i].x = i[0] * SIZEX - @ox
+        @backs[i].x  = i[0] * SIZEX - @ox
         if i[0] < (@ox / 32 - 1)
           @backs[i].x += @map_data.xsize * SIZEX
         elsif i[0] == -1
@@ -151,7 +153,7 @@ class Tilemap
     else
       for i in @backs.keys
         @backs[i].ox = 0
-        @backs[i].x = i[0] * SIZEX - @ox
+        @backs[i].x  = i[0] * SIZEX - @ox
       end
     end
     #需要重新描绘的图快
@@ -170,7 +172,7 @@ class Tilemap
     end
   end
 
-             #--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
   def refreshoy
     #需要释放掉的图块
     rangei = (@lastox / SIZEX - 1)..((@lastox + FBLX) / SIZEX)
@@ -193,7 +195,7 @@ class Tilemap
     if @oy >= (@map_data.ysize * SIZEY - FBLY)
       for i in @backs.keys
         @backs[i].oy = 0
-        @backs[i].y = i[1] * SIZEY - @oy
+        @backs[i].y  = i[1] * SIZEY - @oy
         if i[1] < (@oy / 32 - 1)
           @backs[i].y += @map_data.ysize * SIZEY
         elsif i[1] == -1
@@ -203,7 +205,7 @@ class Tilemap
     else
       for i in @backs.keys
         @backs[i].oy = 0
-        @backs[i].y = i[1] * SIZEY - @oy
+        @backs[i].y  = i[1] * SIZEY - @oy
       end
     end
     #需要重新描绘的图快
@@ -222,8 +224,8 @@ class Tilemap
     end
   end
 
-             #--------------------------------------------------------------------------
-             #i为x坐标,j为y坐标,k为图层
+  #--------------------------------------------------------------------------
+  #i为x坐标,j为y坐标,k为图层
   def draw(i, j, k)
     i0 = i
     j0 = j
@@ -242,10 +244,10 @@ class Tilemap
       @backs[[i, j, k]].y = j0 * SIZEY - @oy
       return
     end
-    @backs[[i, j, k]] = Sprite.new(@viewport)
-    @backs[[i, j, k]].x = i0 * SIZEX - @ox
-    @backs[[i, j, k]].y = j0 * SIZEY - @oy
-    @backs[[i, j, k]].z = k * 2
+    @backs[[i, j, k]]        = Sprite.new(@viewport)
+    @backs[[i, j, k]].x      = i0 * SIZEX - @ox
+    @backs[[i, j, k]].y      = j0 * SIZEY - @oy
+    @backs[[i, j, k]].z      = k * 2
     @backs[[i, j, k]].bitmap = cachebitmap(id)
     if id < 1024
     elsif id < 1664
@@ -253,7 +255,7 @@ class Tilemap
     elsif id < 2816
       id1 = (id - 2048) / 48
       unless [2, 3].include?(id1) #动画
-        @switches[[i, j, k]] = true
+        @switches[[i, j, k]]     = true
         @backs[[i, j, k]].bitmap = @backbitmap[id + @count * 10000]
       end
     elsif id < 4352
@@ -267,101 +269,101 @@ class Tilemap
     @backs[[i, j, k]].z = 200
   end
 
-             #---------------------------------------------------------------------------
+  #---------------------------------------------------------------------------
   def cachebitmap(id)
     if @backbitmap[id].nil?
       if id < 1024 #B/C/D/E的情况
         @backbitmap[id] = Bitmap.new(SIZEX, SIZEY)
-        bitmapid = id / 256 + 5
-        x = id % 256 / 128 * 8 * SIZEX + id % 256 % 128 % 8 * SIZEX
-        y = id % 256 % 128 / 8 * SIZEY
-        rect = Rect.new(x, y, SIZEX, SIZEY)
+        bitmapid        = id / 256 + 5
+        x               = id % 256 / 128 * 8 * SIZEX + id % 256 % 128 % 8 * SIZEX
+        y               = id % 256 % 128 / 8 * SIZEY
+        rect            = Rect.new(x, y, SIZEX, SIZEY)
         @backbitmap[id].blt(0, 0, @bitmaps[bitmapid], rect)
       elsif id < 1664 #A5的情况
         @backbitmap[id] = Bitmap.new(SIZEX, SIZEY)
-        id0 = id - 1536
-        bitmapid = 4
-        x = id0 % 8 * SIZEX
-        y = id0 / 8 * SIZEY
-        rect = Rect.new(x, y, SIZEX, SIZEY)
+        id0             = id - 1536
+        bitmapid        = 4
+        x               = id0 % 8 * SIZEX
+        y               = id0 / 8 * SIZEY
+        rect            = Rect.new(x, y, SIZEX, SIZEY)
         @backbitmap[id].blt(0, 0, @bitmaps[bitmapid], rect)
       elsif id < 2816 #A1的情况
-        id0 = id - 2048
-        id1 = id0 / 48 #编号,含义见附录
-        id2 = id0 % 48 #含义见附录
+        id0      = id - 2048
+        id1      = id0 / 48 #编号,含义见附录
+        id2      = id0 % 48 #含义见附录
         bitmapid = 0
         if id1 == 0 #前四张排列比较特殊,浅海水域-深海水域-浅海装饰-深海装饰
-          x = 0
-          y = 0
-          @backbitmap[id] = drawbitmap1(x, y, id2, bitmapid)
-          x += 64
+          x                       = 0
+          y                       = 0
+          @backbitmap[id]         = drawbitmap1(x, y, id2, bitmapid)
+          x                       += 64
           @backbitmap[id + 10000] = drawbitmap1(x, y, id2, bitmapid)
-          x += 64
+          x                       += 64
           @backbitmap[id + 20000] = drawbitmap1(x, y, id2, bitmapid)
         elsif id1 == 1
-          x = 0
-          y = 96
-          @backbitmap[id] = drawbitmap1(x, y, id2, bitmapid)
-          x += 64
+          x                       = 0
+          y                       = 96
+          @backbitmap[id]         = drawbitmap1(x, y, id2, bitmapid)
+          x                       += 64
           @backbitmap[id + 10000] = drawbitmap1(x, y, id2, bitmapid)
-          x += 64
+          x                       += 64
           @backbitmap[id + 20000] = drawbitmap1(x, y, id2, bitmapid)
         elsif id1 == 2
-          x = 192
-          y = 0
+          x               = 192
+          y               = 0
           @backbitmap[id] = drawbitmap1(x, y, id2, bitmapid)
         elsif id1 == 3
-          x = 192
-          y = 96
+          x               = 192
+          y               = 96
           @backbitmap[id] = drawbitmap1(x, y, id2, bitmapid)
         elsif id1 % 2 == 0 #从第五张开始就是水域-瀑布-水域-瀑布的顺序了
-          x = id1 / 4 % 2 * 256
-          y = id1 / 4 / 2 * 192 + id1 / 2 % 2 * 96
-          @backbitmap[id] = drawbitmap1(x, y, id2, bitmapid)
-          x += 64
+          x                       = id1 / 4 % 2 * 256
+          y                       = id1 / 4 / 2 * 192 + id1 / 2 % 2 * 96
+          @backbitmap[id]         = drawbitmap1(x, y, id2, bitmapid)
+          x                       += 64
           @backbitmap[id + 10000] = drawbitmap1(x, y, id2, bitmapid)
-          x += 64
+          x                       += 64
           @backbitmap[id + 20000] = drawbitmap1(x, y, id2, bitmapid)
         else
-          x = id1 / 4 % 2 * 256 + 192
-          y = id1 / 4 / 2 * 192 + id1 / 2 % 2 * 96
-          @backbitmap[id] = drawbitmap3(x, y, id2, bitmapid)
-          y += 32
+          x                       = id1 / 4 % 2 * 256 + 192
+          y                       = id1 / 4 / 2 * 192 + id1 / 2 % 2 * 96
+          @backbitmap[id]         = drawbitmap3(x, y, id2, bitmapid)
+          y                       += 32
           @backbitmap[id + 10000] = drawbitmap3(x, y, id2, bitmapid)
-          y += 32
+          y                       += 32
           @backbitmap[id + 20000] = drawbitmap3(x, y, id2, bitmapid)
         end
       elsif id < 4352 #A2的情况
-        id0 = id - 2816
-        id1 = id0 / 48 #编号,含义见附录
-        id2 = id0 % 48 #含义见附录
+        id0      = id - 2816
+        id1      = id0 / 48 #编号,含义见附录
+        id2      = id0 % 48 #含义见附录
         bitmapid = 1
-        x = id1 % 8 * 64
-        y = id1 / 8 * 96
+        x        = id1 % 8 * 64
+        y        = id1 / 8 * 96
         if id1 % 8 == 7
           @backbitmap[id] = drawbitmap4(x, y, id2, bitmapid)
         else
           @backbitmap[id] = drawbitmap1(x, y, id2, bitmapid)
         end
       elsif id < 5888 #A3的情况
-        id0 = id - 4352
-        id1 = id0 / 48 #编号,含义见附录
-        id2 = id0 % 48 #含义见附录
-        bitmapid = 2
-        x = id1 % 8 * 64
-        y = id1 / 8 * 64
+        id0             = id - 4352
+        id1             = id0 / 48 #编号,含义见附录
+        id2             = id0 % 48 #含义见附录
+        bitmapid        = 2
+        x               = id1 % 8 * 64
+        y               = id1 / 8 * 64
         @backbitmap[id] = drawbitmap2(x, y, id2, bitmapid)
       else #A4的情况
-        id0 = id - 5888
-        id1 = id0 / 48 #编号,含义见附录
-        id2 = id0 % 48 #含义见附录
+        id0      = id - 5888
+        id1      = id0 / 48 #编号,含义见附录
+        id2      = id0 % 48 #含义见附录
         bitmapid = 3
-        x = id1 % 8 * 64
+        x        = id1 % 8 * 64
         if id1 % 16 < 8
-          y = id1 / 16 * 160
+          y               = id1 / 16 * 160
           @backbitmap[id] = drawbitmap1(x, y, id2, bitmapid)
         else
-          y = id1 / 16 * 160 + 96
+          y               = id1 / 16 * 160 + 96
           @backbitmap[id] = drawbitmap2(x, y, id2, bitmapid)
         end
       end
@@ -369,170 +371,170 @@ class Tilemap
     return @backbitmap[id]
   end
 
-             #---------------------------------------------------------------------------
-             #A1,A2
-             #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
-             #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
+  #---------------------------------------------------------------------------
+  #A1,A2
+  #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
+  #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
   def drawbitmap1(x, y, id, bitmapid)
     bitmap = Bitmap.new(SIZEX, SIZEY)
-    rect = RECT1[LIST1[id][0]].clone
+    rect   = RECT1[LIST1[id][0]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 0, @bitmaps[bitmapid], rect)
-    rect = RECT1[LIST1[id][1]].clone
+    rect   = RECT1[LIST1[id][1]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 0, @bitmaps[bitmapid], rect)
-    rect = RECT1[LIST1[id][2]].clone
+    rect   = RECT1[LIST1[id][2]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-    rect = RECT1[LIST1[id][3]].clone
+    rect   = RECT1[LIST1[id][3]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
     return bitmap
   end
 
-             #---------------------------------------------------------------------------
-             #A3
-             #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
-             #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
+  #---------------------------------------------------------------------------
+  #A3
+  #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
+  #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
   def drawbitmap2(x, y, id, bitmapid)
     bitmap = Bitmap.new(SIZEX, SIZEY)
-    rect = RECT2[LIST2[id][0]].clone
+    rect   = RECT2[LIST2[id][0]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 0, @bitmaps[bitmapid], rect)
-    rect = RECT2[LIST2[id][1]].clone
+    rect   = RECT2[LIST2[id][1]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 0, @bitmaps[bitmapid], rect)
-    rect = RECT2[LIST2[id][2]].clone
+    rect   = RECT2[LIST2[id][2]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-    rect = RECT2[LIST2[id][3]].clone
+    rect   = RECT2[LIST2[id][3]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
     return bitmap
   end
 
-             #---------------------------------------------------------------------------
-             #瀑布
-             #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
-             #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
+  #---------------------------------------------------------------------------
+  #瀑布
+  #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
+  #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
   def drawbitmap3(x, y, id, bitmapid)
     bitmap = Bitmap.new(SIZEX, SIZEY)
-    rect = RECT2[LIST3[id][0]].clone
+    rect   = RECT2[LIST3[id][0]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 0, @bitmaps[bitmapid], rect)
-    rect = RECT2[LIST3[id][1]].clone
+    rect   = RECT2[LIST3[id][1]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 0, @bitmaps[bitmapid], rect)
-    rect = RECT2[LIST3[id][2]].clone
+    rect   = RECT2[LIST3[id][2]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-    rect = RECT2[LIST3[id][3]].clone
+    rect   = RECT2[LIST3[id][3]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
     return bitmap
   end
 
-             #---------------------------------------------------------------------------
-             #柜台
-             #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
-             #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
+  #---------------------------------------------------------------------------
+  #柜台
+  #此处的x,y指图片上的xy位置,id范围为0-48,id含义见附录
+  #i,j为地图上的xy位置,k为层数,bitmapid为源图片编号
   def drawbitmap4(x, y, id, bitmapid)
     if [28, 29, 30, 31, 33].include?(id) #下
       bitmap = Bitmap.new(SIZEX, 40)
-      rect = Rect.new(32, 48, 16, 16)
+      rect   = Rect.new(32, 48, 16, 16)
       rect.x += x
       rect.y += y
       bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-      rect = Rect.new(16, 48, 16, 16)
+      rect   = Rect.new(16, 48, 16, 16)
       rect.x += x
       rect.y += y
       bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
     elsif [38, 39, 45].include?(id) #右+下
       bitmap = Bitmap.new(SIZEX, 40)
-      rect = Rect.new(32, 48, 16, 8)
+      rect   = Rect.new(32, 48, 16, 8)
       rect.x += x
       rect.y += y
       bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-      rect = Rect.new(48, 48, 16, 8)
+      rect   = Rect.new(48, 48, 16, 8)
       rect.x += x
       rect.y += y
       bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
     elsif [40, 41, 43].include?(id) #左+下
       bitmap = Bitmap.new(SIZEX, 40)
-      rect = Rect.new(0, 48, 16, 8)
+      rect   = Rect.new(0, 48, 16, 8)
       rect.x += x
       rect.y += y
       bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-      rect = Rect.new(16, 48, 16, 8)
+      rect   = Rect.new(16, 48, 16, 8)
       rect.x += x
       rect.y += y
       bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
     elsif [44, 46].include?(id) #左+下+右
       bitmap = Bitmap.new(SIZEX, 40)
-      rect = Rect.new(0, 48, 16, 8)
+      rect   = Rect.new(0, 48, 16, 8)
       rect.x += x
       rect.y += y
       bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-      rect = Rect.new(48, 48, 16, 8)
+      rect   = Rect.new(48, 48, 16, 8)
       rect.x += x
       rect.y += y
       bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
     else
       bitmap = Bitmap.new(SIZEX, SIZEY)
-      rect = RECT1[LIST1[id][0]].clone
+      rect   = RECT1[LIST1[id][0]].clone
       rect.x += x
       rect.y += y
       bitmap.blt(0, 0, @bitmaps[bitmapid], rect)
-      rect = RECT1[LIST1[id][1]].clone
+      rect   = RECT1[LIST1[id][1]].clone
       rect.x += x
       rect.y += y
       bitmap.blt(16, 0, @bitmaps[bitmapid], rect)
-      rect = RECT1[LIST1[id][2]].clone
+      rect   = RECT1[LIST1[id][2]].clone
       rect.x += x
       rect.y += y
       bitmap.blt(0, 16, @bitmaps[bitmapid], rect)
-      rect = RECT1[LIST1[id][3]].clone
+      rect   = RECT1[LIST1[id][3]].clone
       rect.x += x
       rect.y += y
       bitmap.blt(16, 16, @bitmaps[bitmapid], rect)
       return bitmap
     end
-    rect = RECT1[LIST1[id][0]].clone
+    rect   = RECT1[LIST1[id][0]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 0, @bitmaps[bitmapid], rect)
-    rect = RECT1[LIST1[id][1]].clone
+    rect   = RECT1[LIST1[id][1]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 0, @bitmaps[bitmapid], rect)
-    rect = RECT1[LIST1[id][2]].clone
+    rect   = RECT1[LIST1[id][2]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(0, 24, @bitmaps[bitmapid], rect)
-    rect = RECT1[LIST1[id][3]].clone
+    rect   = RECT1[LIST1[id][3]].clone
     rect.x += x
     rect.y += y
     bitmap.blt(16, 24, @bitmaps[bitmapid], rect)
     return bitmap
   end
 
-             #--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
   def draw_shadow(i, j, k)
     return if k != 0
     return if i == 0
-    i -= 1
+    i  -= 1
     id = @map_data[i, j, 0]
     return if id < 4352
     if id < 5888 #A3的情况
@@ -566,15 +568,15 @@ class Tilemap
       end
     end
     return unless nexts
-    i += 1
-    @backs[[i, j, 3]] = Sprite.new(@viewport)
+    i                        += 1
+    @backs[[i, j, 3]]        = Sprite.new(@viewport)
     @backs[[i, j, 3]].bitmap = @shadow
-    @backs[[i, j, 3]].x = @backs[[i, j, 0]].x
-    @backs[[i, j, 3]].y = @backs[[i, j, 0]].y
-    @backs[[i, j, 3]].z = 0
+    @backs[[i, j, 3]].x      = @backs[[i, j, 0]].x
+    @backs[[i, j, 3]].y      = @backs[[i, j, 0]].y
+    @backs[[i, j, 3]].z      = 0
   end
 
-             #---------------------------------------------------------------------------
+  #---------------------------------------------------------------------------
   def passages=(value)
     @passages = value
     for i in ([@ox / SIZEX - 1, 0].max)..((@ox + FBLX) / SIZEX)
@@ -587,33 +589,33 @@ class Tilemap
     end
   end
 
-             #---------------------------------------------------------------------------
-             #不知道这个做什么用的
+  #---------------------------------------------------------------------------
+  #不知道这个做什么用的
   def flash_data=(value)
     @flash_data = value
   end
 
-             #---------------------------------------------------------------------------
+  #---------------------------------------------------------------------------
   def update
     if @count1 == ANI
-      @count1 = 0
+      @count1    = 0
       self.count += 1
     else
       @count1 += 1
     end
   end
 
-             #---------------------------------------------------------------------------
+  #---------------------------------------------------------------------------
   def count=(value)
     value = 0 if value >= 3
     @count = value
     for i in @switches.keys
-      id = @map_data[i[0], i[1], i[2]]
+      id               = @map_data[i[0], i[1], i[2]]
       @backs[i].bitmap = @backbitmap[id + value * 10000]
     end
   end
 
-             #--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
   def visible=(value)
     @visible = value
     for i in @backs.values
@@ -621,7 +623,7 @@ class Tilemap
     end
   end
 
-             #--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
   def ox=(value)
     if @ox != value
       @ox = value
@@ -640,7 +642,7 @@ class Tilemap
     end
   end
 
-             #--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
   def oy=(value)
     if @oy != value
       @oy = value
