@@ -1,12 +1,19 @@
 require 'sdl'
 require 'logger'
+require 'pp'
+
 module RGSS
+
   Autoload_Extname = ['.png', '.jpg', '.gif', '.bmp', '.ogg', '.wma', '.mp3', '.wav', '.mid']
-  Log = Logger.new(STDOUT)
+  Log              = Logger.new(STDOUT)
+  @resources       = []
+  @load_path       = []
+
   class <<self
     attr_reader :title
     attr_accessor :load_path
     attr_accessor :rgss_version
+    attr_accessor :resources
     attr_accessor :log
 
     def title=(title)
@@ -30,10 +37,23 @@ module RGSS
       SDL.init SDL::INIT_EVERYTHING
       Graphics.entity = SDL::Screen.open(Graphics.width, Graphics.height, 0, SDL::HWSURFACE)
       SDL::Mixer.open(SDL::Mixer::DEFAULT_FREQUENCY, SDL::Mixer::DEFAULT_FORMAT, SDL::Mixer::DEFAULT_CHANNELS, 1536)
+      SDL::TTF.init
       self.title = @title
     end
+
+    def update
+      while event = SDL::Event.poll
+        case event
+        when SDL::Event::Quit
+          exit
+        when SDL::Event::KeyDown, SDL::Event::KeyUp
+          Input.events << event
+        else #when
+          Log.debug "unhandled event: #{event}"
+        end
+      end
+    end
   end
-  @load_path = []
 
   def rgss_main
     RGSS.init
@@ -64,6 +84,60 @@ module RGSS
 
   end
 
+  module Drawable
+    attr_accessor :x, :y
+    attr_reader :z, :visible
+    include Comparable
+
+    def z=(z)
+      @z = z
+      self.visible = true if @visible and !@disposed
+    end
+
+    def y=(y)
+      @y = y
+      self.visible = true if @visible and !@disposed
+    end
+
+    def <=>(other)
+      result = if @z == other.z
+        @y <=> other.y
+      else
+        @z <=> other.z
+      end
+      result
+    end
+
+    def ==(other)
+      eql?(other)
+    end
+
+    def disposed?
+      @disposed
+    end
+
+    def dispose
+      @disposed    = true
+      self.visible = false
+    end
+
+    def visible=(visible)
+      if @visible
+        RGSS.resources.delete self
+      end
+      @visible = visible
+      if @visible
+        RGSS.resources.each_with_index { |resource, index|
+          return RGSS.resources.insert(index, self) if resource > self
+        }
+        RGSS.resources << self
+      end
+    end
+
+    def draw(destination=Graphics)
+      raise NotImplementedError
+    end
+  end
 
   require_relative 'bitmap'
   require_relative 'color'

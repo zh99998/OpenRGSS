@@ -1,22 +1,24 @@
 class Color
 
   def initialize(red=0, blue=0, green=0, alpha = 255)
-    @red = red
-    @blue = blue
+    @red   = red
+    @blue  = blue
     @green = green
     @alpha = alpha
   end
 
   def set(red, blue=0, green=0, alpha = 255)
+    p red, blue, green, alpha
+    puts caller
     if red.is_a? Color
-      color = red
-      @red = color.red
-      @blue = color.blue
+      color  = red
+      @red   = color.red
+      @blue  = color.blue
       @green = color.green
       @alpha = color.alpha
     else
-      @red = red
-      @blue = blue
+      @red   = red
+      @blue  = blue
       @green = green
       @alpha = alpha
     end

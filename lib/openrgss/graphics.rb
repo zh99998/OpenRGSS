@@ -5,23 +5,14 @@ module Graphics
     attr_accessor :frame_rate, :frame_count, :brightness
 
     def resize_screen(width, height)
-      @width = width
+      @width  = width
       @height = height
     end
 
     def update
-      while event = SDL::Event.poll
-        case event
-        when SDL::Event::Quit
-          exit
-        else #when
-          Log.debug "unhandled event: #{event}"
-        end
-      end
+      RGSS.update
       @entity.fill_rect(0, 0, @width, @height, 0x000000)
-      Sprite.all.each do |sprite|
-        SDL::Surface.blit(sprite.bitmap.entity, sprite.src_rect.x, sprite.src_rect.y, sprite.src_rect.width, sprite.src_rect.height, @entity, sprite.x-sprite.ox, sprite.y-sprite.oy)
-      end
+      RGSS.resources.each { |resource| resource.draw(self) }
       @entity.update_rect(0, 0, 0, 0)
     end
 

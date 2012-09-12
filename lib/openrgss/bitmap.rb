@@ -4,11 +4,13 @@ class Bitmap
   def initialize(width, height=nil)
     @entity = if width.is_a? String
       filename = width
-      SDL::Surface.load(RGSS.get_file(filename)).display_format_alpha
+      filepath = RGSS.get_file(filename)
+      Log.debug('load bitmap') { filepath }
+      SDL::Surface.load(filepath).display_format_alpha
     else
-      SDL::Surface.new(SDL::SWSURFACE, width, height, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff)
+      SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff)
     end
-    @font = Font.new
+    @font   = Font.new
   end
 
   def dispose
@@ -40,7 +42,15 @@ class Bitmap
   end
 
   def fill_rect(x, y, width=nil, height=nil, color=nil)
-
+    if x.is_a? Rect
+      rect   = x
+      color  = y
+      x      = rect.x
+      y      = rect.y
+      width  = rect.width
+      height = rect.height
+    end
+    @entity.fill_rect(x, y, width, height, color.alpha<<24|color.red<<16|color.green<<8|color.blue)
   end
 
   def defgradient_fill_rect(x, y, width, height=false, color1=nil, color2=nil, vertical=false)
@@ -56,7 +66,7 @@ class Bitmap
   end
 
   def get_pixel(x, y)
-
+    Color.new(255, 255, 255)
   end
 
   def set_pixel(x, y, color)
@@ -76,7 +86,17 @@ class Bitmap
   end
 
   def draw_text(x, y, width=0, height=nil, str=nil, align=0)
+    if x.is_a? Rect
+      rect  = x
+      str   = y
+      align = width
 
+      x      = rect.x
+      y      = rect.y
+      width  = rect.width
+      height = rect.height
+    end
+    @font.entity.draw_solid_utf8(@entity, str, x, y, @font.color.red, @font.color.green, @font.color.blue)
   end
 
   def text_size(str)
