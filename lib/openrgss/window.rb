@@ -4,22 +4,23 @@ class Window
   attr_reader :openness
 
   def initialize(x=0, y=0, width=0, height=0)
-    @x            = x
-    @y            = y
-    @z            = 0
-    @ox           = 0
-    @oy           = 0
-    @width        = width
-    @height       = height
-    @tone         = Tone.new
-    @contents     = Bitmap.new(32, 32)
-    @cursor_rect  = Rect.new
-    @back_opacity = 255
-    @active       = true
-    @openness     = 255
-
-    @cursor_status = 0
-    self.visible   = true
+    @x              = x
+    @y              = y
+    @z              = 0
+    @ox             = 0
+    @oy             = 0
+    @width          = width
+    @height         = height
+    @tone           = Tone.new
+    @contents       = Bitmap.new(32, 32)
+    @cursor_rect    = Rect.new
+    @back_opacity   = 255
+    @active         = true
+    @openness       = 255
+    @padding        = 12
+    @padding_bottom = 12
+    @cursor_status  = 0
+    self.visible    = true
   end
 
   def update
@@ -49,8 +50,8 @@ class Window
 
   def draw(destination=Graphics)
     destination.entity.fill_rect(@x-@ox, @y-@oy, @width, @height, 0x0000FF | back_opacity << 24)
-    SDL::Surface.blit(@contents.entity, 0, 0, @contents.width, @contents.height, destination.entity, @x-@ox+8, @y-@oy+8)
+    SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, @x-@ox+padding, @y-@oy+padding)
     cursor_color = (255 - @cursor_status).abs
-    destination.entity.draw_rect(@x-@ox+8+cursor_rect.x, @y-@oy+8+cursor_rect.y, cursor_rect.width, cursor_rect.height, 0xFF | cursor_color << 8 | cursor_color << 16)
+    destination.entity.draw_rect(@x-@ox+padding+cursor_rect.x, @y-@oy+padding+cursor_rect.y, cursor_rect.width, cursor_rect.height, 0xFF | cursor_color << 8 | cursor_color << 16)
   end
 end
