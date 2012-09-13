@@ -15,6 +15,7 @@ class Sprite
     @src_rect    = Rect.new
     @color       = Color.new
     @tone        = Tone.new
+    @opacity     = 255
     self.visible = true
 
   end
@@ -41,6 +42,8 @@ class Sprite
   end
 
   def draw(destination=Graphics)
+    return if @opacity <= 0
+
     base_x = @x-@ox
     base_y = @y-@oy
     if viewport
@@ -48,6 +51,7 @@ class Sprite
       base_x += viewport.x
       base_y += viewport.y
     end
+
     SDL::Surface.blit(@bitmap.entity, @src_rect.x, @src_rect.y, @src_rect.width, @src_rect.height, destination.entity, base_x, base_y)
     destination.entity.set_clip_rect(0, 0, destination.width, destination.height) if viewport
   end
