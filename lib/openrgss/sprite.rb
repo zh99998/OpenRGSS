@@ -33,14 +33,22 @@ class Sprite
   end
 
   def width
-
+    bitmap.width
   end
 
   def height
-
+    bitmap.height
   end
 
   def draw(destination=Graphics)
-    SDL::Surface.blit(@bitmap.entity, @src_rect.x, @src_rect.y, @src_rect.width, @src_rect.height, destination.entity, @x-@ox, @y-@oy)
+    base_x = @x-@ox
+    base_y = @y-@oy
+    if viewport
+      destination.entity.set_clip_rect(viewport.x, viewport.y, viewport.width, viewport.height)
+      base_x += viewport.x
+      base_y += viewport.y
+    end
+    SDL::Surface.blit(@bitmap.entity, @src_rect.x, @src_rect.y, @src_rect.width, @src_rect.height, destination.entity, base_x, base_y)
+    destination.entity.set_clip_rect(0, 0, destination.width, destination.height) if viewport
   end
 end

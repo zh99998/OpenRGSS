@@ -15,6 +15,7 @@ class Window
     @contents       = Bitmap.new(32, 32)
     @cursor_rect    = Rect.new
     @back_opacity   = 255
+    @opacity        = 255
     @active         = true
     @openness       = 255
     @padding        = 12
@@ -33,7 +34,10 @@ class Window
   end
 
   def move(x, y, width, height)
-
+    @x      = x
+    @y      = y
+    @width  = width
+    @height = height
   end
 
   def open?
@@ -49,9 +53,35 @@ class Window
   end
 
   def draw(destination=Graphics)
-    destination.entity.fill_rect(@x-@ox, @y-@oy, @width, @height, 0x0000FF | back_opacity << 24)
-    SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, @x-@ox+padding, @y-@oy+padding)
-    cursor_color = (255 - @cursor_status).abs
-    destination.entity.draw_rect(@x-@ox+padding+cursor_rect.x, @y-@oy+padding+cursor_rect.y, cursor_rect.width, cursor_rect.height, 0xFF | cursor_color << 8 | cursor_color << 16)
+    return if close?
+    base_x = @x-@ox
+    base_y = @y-@oy
+    if viewport
+      destination.entity.set_clip_rect(viewport.x, viewport.y, viewport.width, viewport.height)
+      base_x += viewport.x
+      base_y += viewport.y
+    end
+
+
+    #background
+    destination.entity.fill_rect(base_x, base_y+@height*(255-openness)/255/2, @width, @height*openness/255, destination.entity.map_rgba(0, 0, 255, back_opacity))
+
+    #border
+    destination.entity.draw_rect(base_x, base_y+@height*(255-openness)/255/2, @width, @height*openness/255, destination.entity.map_rgba(255, 255, 255, opacity))
+
+    if open?
+      destination.entity.draw_rect(base_x+padding-1, base_y+padding-1, @width-padding*2+2, @height-padding-padding_bottom+2, destination.entity.map_rgba(255, 255, 255, opacity))
+
+      #contents
+      SDL::Surface.blit(@contents.entity, 0, 0, base_y-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding)
+
+      #cursor
+      if cursor_rect.width > 0 and cursor_rect.height > 0
+        cursor_color = (255 - @cursor_status).abs
+        destination.entity.draw_rect(base_x+padding+cursor_rect.x, base_y+padding+cursor_rect.y, cursor_rect.width, cursor_rect.height, destination.entity.map_rgba(cursor_color, cursor_color, 255, 255))
+      end
+    end
+
+    destination.entity.set_clip_rect(0, 0, destination.width, destination.height) if viewport
   end
 end

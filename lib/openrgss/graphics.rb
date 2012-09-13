@@ -6,6 +6,7 @@ module Graphics
   @skip               = 0
   @ticks              = 0
   @fps_ticks          = 0
+  @brightness         = 255
   class <<self
     attr_reader :width, :height
     attr_accessor :entity
@@ -21,6 +22,13 @@ module Graphics
     def update
       RGSS.update
       @frame_count += 1
+
+      if @fading
+        Graphics.brightness += @fading
+        if Graphics.brightness == 0 or Graphics.brightness == 255
+          @fading = nil
+        end
+      end
 
       if @skip >= 10 or SDL.get_ticks < @ticks + 1000 / frame_rate
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
@@ -50,11 +58,11 @@ module Graphics
     end
 
     def fadeout(duration)
-
+      @fading = 255.to_f / 255 #duration
     end
 
     def fadein(duration)
-
+      @fading = -255.to_f / 255 ##duration
     end
 
     def freeze
@@ -77,6 +85,13 @@ module Graphics
 
     def play_movie(filename)
 
+    end
+
+    def brightness=(brightness)
+      @brightness = brightness < 0 ? 0 : brightness > 255 ? 255 : brightness
+      #gamma       = @brightness.to_f / 255
+      #SDL::Screen.set_gamma(5,1,1)
+      #seems SDL::Screen.set_gamma and SDL::Screen.set_gamma_rmap doesn't work
     end
   end
 end

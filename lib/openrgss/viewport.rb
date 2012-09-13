@@ -1,5 +1,5 @@
 class Viewport
-  attr_accessor :rect, :visible, :z, :ox, :oy, :color, :tone
+  attr_accessor :rect, :visible, :x, :y, :z, :ox, :oy, :color, :tone
 
   def initialize(*args)
     @tone  = Tone.new
@@ -8,11 +8,11 @@ class Viewport
   end
 
   def dispose
-
+    @disposed = true
   end
 
   def disposed?
-
+    @disposed
   end
 
   def flash(color, duration)
