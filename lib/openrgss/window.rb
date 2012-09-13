@@ -73,7 +73,7 @@ class Window
       destination.entity.draw_rect(base_x+padding-1, base_y+padding-1, @width-padding*2+2, @height-padding-padding_bottom+2, destination.entity.map_rgba(255, 255, 255, opacity))
 
       #contents
-      SDL::Surface.blit(@contents.entity, 0, 0, base_y-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding)
+      SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding)
 
       #cursor
       if cursor_rect.width > 0 and cursor_rect.height > 0
