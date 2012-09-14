@@ -1,11 +1,12 @@
 class Viewport
-  attr_accessor :rect, :visible, :z, :ox, :oy, :color, :tone
+  attr_accessor :rect, :visible, :z, :ox, :oy, :color, :tone, :created_at
 
   def initialize(*args)
     @tone  = Tone.new
     @color = Color.new
     args = [0, 0, Graphics.width, Graphics.height] if args.empty?
-    @rect = Rect.new *args
+    @rect       = Rect.new *args
+    @created_at = Time.now
   end
 
   def x
@@ -22,6 +23,12 @@ class Viewport
 
   def y=(y)
     @rect.y = y
+    RGSS.resources.select { |resource| resource.viewport == self }.each { |resource| resource.visible = resource.visible }
+  end
+
+  def z=(z)
+    @z = z
+    RGSS.resources.select { |resource| resource.viewport == self }.each { |resource| resource.visible = resource.visible }
   end
 
   def width

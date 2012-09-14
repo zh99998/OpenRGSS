@@ -7,6 +7,8 @@ module Graphics
   @ticks              = 0
   @fps_ticks          = 0
   @brightness         = 255
+  @width              = 640
+  @height             = 480
   class <<self
     attr_reader :width, :height
     attr_accessor :entity

@@ -9,6 +9,7 @@ class Tilemap
   def initialize(viewport=nil)
     @viewport = viewport
     @bitmaps  = []
+    super()
   end
 
   def update

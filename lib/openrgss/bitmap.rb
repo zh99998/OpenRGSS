@@ -106,6 +106,13 @@ class Bitmap
   end
 
   def clear_rect(x, y=nil, width=nil, height=nil)
+    if x.is_a? Rect
+      rect   = x
+      x      = rect.x
+      y      = rect.y
+      width  = rect.width
+      height = rect.height
+    end
     @entity.fill_rect(x, y, width, height, 0x00000000)
   end
 

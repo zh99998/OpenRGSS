@@ -1,6 +1,6 @@
 class Window
   include RGSS::Drawable
-  attr_accessor :windowskin, :contents, :cursor_rect, :viewport, :active, :arrows_visible, :pause, :width, :height, :ox, :oy, :padding, :padding_bottom, :opacity, :back_opacity, :contents_opacity, :tone
+  attr_accessor :windowskin, :contents, :cursor_rect, :active, :arrows_visible, :pause, :width, :height, :ox, :oy, :padding, :padding_bottom, :opacity, :back_opacity, :contents_opacity, :tone
   attr_reader :openness
 
   def initialize(x=0, y=0, width=0, height=0)
@@ -22,7 +22,8 @@ class Window
     @padding          = 12
     @padding_bottom   = 12
     @cursor_status    = 0
-    self.visible      = true
+    @visible          = true
+    super()
   end
 
   def update
@@ -64,7 +65,7 @@ class Window
     end
 
     #background
-    destination.entity.fill_rect(base_x, base_y+@height*(255-openness)/255/2, @width, @height*openness/255, destination.entity.map_rgba(0, 0, 255, back_opacity)) if back_opacity > 0
+    destination.entity.fill_rect(base_x, base_y+@height*(255-openness)/255/2, @width, @height*openness/255, destination.entity.map_rgba(0, 0, 255, back_opacity)) if back_opacity > 0 and opacity > 0
 
     #border
     destination.entity.draw_rect(base_x, base_y+@height*(255-openness)/255/2, @width, @height*openness/255, destination.entity.map_rgba(255, 255, 255, opacity)) if opacity > 0

@@ -106,9 +106,18 @@ module RGSS
   end
 
   module Drawable
-    attr_accessor :x, :y
+    attr_accessor :x, :y, :viewport, :created_at
     attr_reader :z, :visible
-    include Comparable
+
+    def initialize
+      @created_at  = Time.now
+      self.visible = @visible
+    end
+
+    def viewport=(viewport)
+      @viewport    = viewport
+      self.visible = @visible
+    end
 
     def z=(z)
       @z = z
@@ -118,19 +127,6 @@ module RGSS
     def y=(y)
       @y = y
       self.visible = true if @visible and !@disposed
-    end
-
-    def <=>(other)
-      result = if @z == other.z
-        @y <=> other.y
-      else
-        @z <=> other.z
-      end
-      result
-    end
-
-    def ==(other)
-      eql?(other)
     end
 
     def disposed?
@@ -149,7 +145,51 @@ module RGSS
       @visible = visible
       if @visible
         RGSS.resources.each_with_index { |resource, index|
-          return RGSS.resources.insert(index, self) if resource > self
+
+          #TODO: 简化逻辑
+
+          if resource.viewport
+            resource_viewport_z = resource.viewport.z
+            resource_viewport_y = resource.viewport.y
+          else
+            resource_viewport_z = 0
+            resource_viewport_y = 0
+          end
+          if self.viewport
+            self_viewport_z = self.viewport.z
+            self_viewport_y = self.viewport.y
+          else
+            self_viewport_z = 0
+            self_viewport_y = 0
+          end
+
+          return RGSS.resources.insert(index, self) if (
+
+
+          result = if self_viewport_z == resource_viewport_z
+            if self_viewport_y == resource_viewport_y
+              if (self.viewport.nil? and resource.viewport) or (self.viewport and resource.viewport and self.viewport.created_at < resource.viewport.created_at)
+                true
+              elsif (self.viewport and resource.viewport.nil?) or (self.viewport and resource.viewport and self.viewport.created_at > resource.viewport.created_at)
+                false
+              elsif self.z == resource.z
+                if self.y == resource.y
+                  self.created_at < resource.created_at
+                else
+                  self.y < resource.y
+                end
+              else
+                self.y < resource.y
+              end
+            else
+              self_viewport_y < resource_viewport_y
+            end
+          else
+            self_viewport_z < resource_viewport_z
+          end
+          )
+          p self, resource, result if self.instance_of?(Window_BattleStatus) and resource.instance_of? Sprite
+          result
         }
         RGSS.resources << self
       end
@@ -158,6 +198,7 @@ module RGSS
     def draw(destination=Graphics)
       raise NotImplementedError
     end
+
   end
 
   require_relative 'bitmap'

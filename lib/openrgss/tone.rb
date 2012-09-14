@@ -25,17 +25,21 @@ class Tone
 
   def set(red, green=0, blue=0, gray=0)
     if red.is_a? Tone
-      tone = red
-      @red = tone.red
+      tone   = red
+      @red   = tone.red
       @green = tone.green
-      @blue = tone.blue
-      @gray = tone.gray
+      @blue  = tone.blue
+      @gray  = tone.gray
     else
-      @red = red
+      @red   = red
       @green = green
-      @blue = blue
-      @gray = gray
+      @blue  = blue
+      @gray  = gray
     end
+  end
+
+  def to_s
+    "(#{red}, #{green}, #{blue}, #{gray})"
   end
 
   def blend(tone)
@@ -43,10 +47,10 @@ class Tone
   end
 
   def blend!(tone)
-    self.red += tone.red
+    self.red   += tone.red
     self.green += tone.green
-    self.blue += tone.blue
-    self.gray += tone.gray
+    self.blue  += tone.blue
+    self.gray  += tone.gray
     self
   end
 

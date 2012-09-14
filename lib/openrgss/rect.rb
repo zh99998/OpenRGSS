@@ -25,6 +25,10 @@ class Rect
     end
   end
 
+  def to_s
+    "(#{x}, #{y}, #{width}, #{height})"
+  end
+
   def empty
     set(0, 0, 0, 0)
   end
