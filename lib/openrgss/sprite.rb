@@ -48,8 +48,8 @@ class Sprite
     base_y = @y-@oy
     if viewport
       destination.entity.set_clip_rect(viewport.x, viewport.y, viewport.width, viewport.height)
-      base_x += viewport.x
-      base_y += viewport.y
+      base_x += viewport.x - viewport.ox
+      base_y += viewport.y - viewport.oy
     end
 
     SDL::Surface.blit(@bitmap.entity, @src_rect.x, @src_rect.y, @src_rect.width, @src_rect.height, destination.entity, base_x, base_y)

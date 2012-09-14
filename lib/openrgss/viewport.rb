@@ -2,12 +2,13 @@ class Viewport
   attr_accessor :rect, :visible, :z, :ox, :oy, :color, :tone, :created_at
 
   def initialize(*args)
-    @tone  = Tone.new
-    @color = Color.new
-    args = [0, 0, Graphics.width, Graphics.height] if args.empty?
-    @rect       = Rect.new *args
+    @tone       = Tone.new
+    @color      = Color.new
+    @rect       = args.empty? ? Rect.new(0, 0, Graphics.width, Graphics.height) : Rect.new(*args)
     @created_at = Time.now
     @z          = 0
+    @ox         = 0
+    @oy         = 0
   end
 
   def x

@@ -60,8 +60,8 @@ class Window
     base_y = @y-@oy
     if viewport
       destination.entity.set_clip_rect(viewport.x, viewport.y, viewport.width, viewport.height)
-      base_x += viewport.x
-      base_y += viewport.y
+      base_x += viewport.x - viewport.ox
+      base_y += viewport.y - viewport.oy
     end
 
     #background

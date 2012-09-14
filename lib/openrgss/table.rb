@@ -15,7 +15,7 @@ class Table
   end
 
   def [](x, y=0, z=0)
-    return nil if x > @xsize or y > @ysize or z > zsize
+    return nil if x >= @xsize or y >= @ysize
     @data[x + y * @xsize + z * @xsize * @ysize]
   end
 
