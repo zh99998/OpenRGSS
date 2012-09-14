@@ -2,12 +2,12 @@ class Table
   attr_accessor :xsize, :ysize, :zsize, :size
 
   def initialize(*args)
-    @size = args.length
+    @size                 = args.length
     @xsize, @ysize, @zsize=args
-    @xsize||=1
-    @ysize||=1
-    @zsize||=1
-    @data = Array.new(@xsize*@ysize*@zsize, 0)
+    @xsize                ||=1
+    @ysize                ||=1
+    @zsize                ||=1
+    @data                 = Array.new(@xsize*@ysize*@zsize, 0)
   end
 
   def []=(x, y=0, z=0, v)
@@ -15,6 +15,7 @@ class Table
   end
 
   def [](x, y=0, z=0)
+    return nil if x > @xsize or y > @ysize or z > zsize
     @data[x + y * @xsize + z * @xsize * @ysize]
   end
 

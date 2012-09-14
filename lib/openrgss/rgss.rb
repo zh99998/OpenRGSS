@@ -147,7 +147,6 @@ module RGSS
         RGSS.resources.each_with_index { |resource, index|
 
           #TODO: 简化逻辑
-
           if resource.viewport
             resource_viewport_z = resource.viewport.z
             resource_viewport_y = resource.viewport.y
@@ -164,9 +163,7 @@ module RGSS
           end
 
           return RGSS.resources.insert(index, self) if (
-
-
-          result = if self_viewport_z == resource_viewport_z
+          if self_viewport_z == resource_viewport_z
             if self_viewport_y == resource_viewport_y
               if (self.viewport.nil? and resource.viewport) or (self.viewport and resource.viewport and self.viewport.created_at < resource.viewport.created_at)
                 true
@@ -188,8 +185,7 @@ module RGSS
             self_viewport_z < resource_viewport_z
           end
           )
-          p self, resource, result if self.instance_of?(Window_BattleStatus) and resource.instance_of? Sprite
-          result
+
         }
         RGSS.resources << self
       end
