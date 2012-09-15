@@ -75,8 +75,9 @@ class Window
       SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding) if contents_opacity > 0
       #cursor
       if cursor_rect.width > 0 and cursor_rect.height > 0
-        cursor_color = (255 - @cursor_status).abs
-        destination.entity.draw_rect(base_x+padding+cursor_rect.x, base_y+padding+cursor_rect.y, cursor_rect.width, cursor_rect.height, destination.entity.map_rgba(cursor_color, cursor_color, 255, 255))
+        destination.entity.put cursor, base_x + cursor_rect.x + padding, base_y + cursor_rect.y + padding
+        #cursor_color = (255 - @cursor_status).abs
+        #destination.entity.draw_rect(base_x+padding+cursor_rect.x, base_y+padding+cursor_rect.y, cursor_rect.width, cursor_rect.height, destination.entity.map_rgba(cursor_color, cursor_color, 255, 255))
       end
     end
 
@@ -151,7 +152,7 @@ class Window
     end
 
     result = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, 32, rmask, gmask, bmask, amask)
-    @windowskin.entity.set_alpha(0, 0)
+    @windowskin.entity.set_alpha(0, 255)
     SDL::Surface.blit(@windowskin.entity, 64, 0, 16, 16, result, 0, 0)
     SDL::Surface.blit(@windowskin.entity, 128-16, 0, 16, 16, result, result.w-16, 0)
     SDL::Surface.blit(@windowskin.entity, 64, 64-16, 16, 16, result, 0, result.h-16)
@@ -161,6 +162,39 @@ class Window
     tiled(result, 16, 0, result.w-32, 16, @windowskin.entity, 64+16, 0, 32, 32)
     tiled(result, 16, result.h-16, result.w-32, 16, @windowskin.entity, 64+16, 64-16, 32, 32)
     @@border[[@windowskin.entity, width, height]] = result
+  end
+
+  def cursor
+    width  = cursor_rect.width
+    height = cursor_rect.height
+    result = @@background[[@windowskin.entity, width, height]]
+    return result if result
+    puts "drawing a new cursor"
+    big_endian = ([1].pack("N") == [1].pack("L"))
+    if big_endian
+      rmask = 0xff000000
+      gmask = 0x00ff0000
+      bmask = 0x0000ff00
+      amask = 0x000000ff
+    else
+      rmask = 0x000000ff
+      gmask = 0x0000ff00
+      bmask = 0x00ff0000
+      amask = 0xff000000
+    end
+    result = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, 32, rmask, gmask, bmask, amask)
+
+    @windowskin.entity.set_alpha(0, 255)
+    SDL::Surface.blit(@windowskin.entity, 64, 64, 8, 8, result, 0, 0)
+    SDL::Surface.blit(@windowskin.entity, 96-8, 64, 8, 8, result, width-8, 0)
+    SDL::Surface.blit(@windowskin.entity, 64, 96-8, 8, 8, result, 0, height-8)
+    SDL::Surface.blit(@windowskin.entity, 96-8, 96-8, 8, 8, result, width-8, height-8)
+    tiled(result, 0, 8, 8, height-16, @windowskin.entity, 64, 64+8, 8, 8)
+    tiled(result, width-8, 8, 8, height-16, @windowskin.entity, 96-8, 64+8, 8, 8)
+    tiled(result, 8, 0, width-16, 8, @windowskin.entity, 64+8, 64, 8, 8)
+    tiled(result, 8, height-8, width-16, 8, @windowskin.entity, 64+8, 96-8, 8, 8)
+    tiled(result, 8, 8, width-16, height-16, @windowskin.entity, 64+8, 64+8, 16, 16)
+    @@background[[@windowskin.entity, width, height]] = result
   end
 
   def tiled(g, x, y, w, h, skin, x1, y1, w1, h1)
