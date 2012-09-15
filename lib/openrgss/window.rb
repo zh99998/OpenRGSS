@@ -125,20 +125,9 @@ class Window
     height = @height*@openness/255-8
     result = @@background[[@windowskin.entity, width, height, @tone]]
     return result if result
-    big_endian = ([1].pack("N") == [1].pack("L"))
-    if big_endian
-      rmask = 0xff000000
-      gmask = 0x00ff0000
-      bmask = 0x0000ff00
-      amask = 0x000000ff
-    else
-      rmask = 0x000000ff
-      gmask = 0x0000ff00
-      bmask = 0x00ff0000
-      amask = 0xff000000
-    end
+
     tonedbg = applyTone
-    result  = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, 24, rmask, gmask, bmask, 0)
+    result  = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, Graphics.entity)
 
 
     @windowskin.entity.set_clip_rect(0, 0, 64, 64)
