@@ -94,11 +94,15 @@ module Graphics
       new_frame.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
       new_frame.entity.set_alpha(SDL::SRCALPHA, 255)
       RGSS.resources.each { |resource| resource.draw(new_frame) }     
+      maker = Bitmap.new(@width,@height)
       duration.times{|i|
         new_frame.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,step*i)
-        #@g.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,255-step*i)
+        @g.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,255-step*i)
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
-        @entity.put new_frame.entity,0,0
+        maker.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
+        maker.entity.put new_frame.entity,0,0
+        maker.entity.put @g.entity,0,0
+        @entity.put maker.entity,0,0
         #@entity.put @g.entity,0,0
         @entity.update_rect(0, 0, 0, 0)
         sleep 1/60.0
