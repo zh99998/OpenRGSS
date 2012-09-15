@@ -1,4 +1,4 @@
-require 'sdl'
+﻿require 'sdl'
 require 'logger'
 require 'pp'
 
@@ -118,14 +118,35 @@ module RGSS
       @viewport    = viewport
       self.visible = @visible
     end
-
+    def >(v)
+      return false if self.viewport.nil?&&v.viewport
+      unless (v.viewport.nil?)
+        return false if self.viewport.z<v.viewport.z 
+        return false if self.viewport.z==v.viewport.z and self.viewport.y<v.viewport.y
+        return false if self.viewport.z==v.viewport.z and self.viewport.y==v.viewport.y and self.viewport.created_at<v.viewport.created_at
+      end
+      return false if self.z<v.z
+      return false if self.z==v.z  and self.y<v.y
+      return false if self.z==v.z  and self.y<v.y and self.created_at<v.created_at
+      return true
+    end
+    #$a=0
+    def <=>(v)
+      #print $a+=1
+      return 1 if (self>v)
+      return -1
+    end
     def z=(z)
+      return if z==@z
       @z = z
+      
       self.visible = true if @visible and !@disposed
     end
 
     def y=(y)
+      return if y==@y
       @y = y
+     # RGSS.resources.sort
       self.visible = true if @visible and !@disposed
     end
 
@@ -139,10 +160,17 @@ module RGSS
     end
 
     def visible=(visible)
+      #if @visible
+      #  RGSS.resources.delete self
+      #end
+      @visible = visible
+      RGSS.resources.delete self unless @visible
       if @visible
         RGSS.resources.delete self
-      end
-      @visible = visible
+        RGSS.resources<< self
+     #   RGSS.resources.sort
+      end 
+=begin
       if @visible
         RGSS.resources.each_with_index { |resource, index|
 
@@ -162,7 +190,7 @@ module RGSS
             self_viewport_y = 0
           end
 
-          return RGSS.resources.insert(index, self) if (
+          return RGSS.resources.insert(index-1, self) if (
           if self_viewport_z == resource_viewport_z
             if self_viewport_y == resource_viewport_y
               if (self.viewport.nil? and resource.viewport) or (self.viewport and resource.viewport and self.viewport.created_at < resource.viewport.created_at)
@@ -187,8 +215,9 @@ module RGSS
           )
 
         }
-        RGSS.resources << self
+        RGSS.resources += [self]
       end
+=end
     end
 
     def draw(destination=Graphics)

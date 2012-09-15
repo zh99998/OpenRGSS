@@ -155,6 +155,7 @@ class Bitmap
     elsif align == 1
       x += (width - @font.entity.text_size(str)[0]) / 2
     end
+
     @font.entity.draw_solid_utf8(@entity, str, x, y, @font.color.red, @font.color.green, @font.color.blue)
   end
 

@@ -9,6 +9,7 @@ module Graphics
   @brightness         = 255
   @width              = 640
   @height             = 480
+  @g                  = Bitmap.new(544,416)
   class <<self
     attr_reader :width, :height
     attr_accessor :entity
@@ -32,19 +33,27 @@ module Graphics
         end
       end
 
-      if @skip >= 10 or SDL.get_ticks < @ticks + 1000 / frame_rate
+      #if @skip >= 1 or SDL.get_ticks < @ticks + 1000 / frame_rate
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
-        RGSS.resources.each { |resource| resource.draw(self) }
+        if (@ors!=RGSS.resources)
+          RGSS.resources.sort
+          @ors=RGSS.resources
+        end
+        RGSS.resources.each { |resource| resource.draw(self)}
         @entity.update_rect(0, 0, 0, 0)
-
-        sleeptime = @ticks + 1000 / frame_rate - SDL.get_ticks
+       # @g.entity.fill_rect(0, 0, @width, @height, 0xff000000)
+       # RGSS.resources.each { |resource| resource.draw(@g) }
+       # @entity.fill_rect(0, 0, @width, @height, 0x000000)
+       # @entity.put @g.entity,0,0
+     	  # @entity.update_rect(0, 0, 0, 0)
+        sleeptime = @ticks + 1000 / frame_rate - SDL.get_ticks - RGSS.resources.size	
         sleep sleeptime.to_f / 1000 if sleeptime > 0
 
         @skip  = 0
         @ticks = SDL.get_ticks
-      else
-        @skip += 1
-      end
+      #else
+      #  @skip += 1
+      #end
 
       @frame_count_recent += 1
       if @frame_count_recent >= FPS_COUNT
