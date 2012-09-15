@@ -1,6 +1,6 @@
 class Color
 
-  def initialize(red=0, blue=0, green=0, alpha = 255)
+  def initialize(red=0, green=0, blue=0, alpha = 255)
     @red   = red
     @blue  = blue
     @green = green

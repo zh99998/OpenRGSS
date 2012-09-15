@@ -117,8 +117,10 @@ class Bitmap
   end
 
   def get_pixel(x, y)
-    color = @entity.get_pixel(x, y)
-    Color.new((color & @entity.Rmask) >> @entity.Rshift, (color & @entity.Gmask) >> @entity.Gshift, (color & @entity.Bmask) >> @entity.Bshift, (color & @entity.Amask) >> @entity.Ashift)
+    
+    color = @entity.format.getRGBA(@entity.get_pixel(x, y))
+    return Color.new(color[0],color[1],color[2],color[3])
+    #Color.new((color & @entity.Rmask) >> @entity.Rshift, (color & @entity.Gmask) >> @entity.Gshift, (color & @entity.Bmask) >> @entity.Bshift, (color & @entity.Amask) >> @entity.Ashift)
   end
 
   def set_pixel(x, y, color)
