@@ -6,10 +6,11 @@ module Graphics
   @skip               = 0
   @ticks              = 0
   @fps_ticks          = 0
-  @brightness         = 255
+  @brightness         = 0
   @width              = 640
   @height             = 480
   @g                  = Bitmap.new(544,416)
+  @freeze = true
   class <<self
     attr_reader :width, :height
     attr_accessor :entity
@@ -33,27 +34,32 @@ module Graphics
         end
       end
 
-      #if @skip >= 1 or SDL.get_ticks < @ticks + 1000 / frame_rate
+      if @skip >= 10 or SDL.get_ticks < @ticks + 1000 / frame_rate
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
         if (@ors!=RGSS.resources)
           RGSS.resources.sort
           @ors=RGSS.resources
         end
-        RGSS.resources.each { |resource| resource.draw(self)}
-        @entity.update_rect(0, 0, 0, 0)
-       # @g.entity.fill_rect(0, 0, @width, @height, 0xff000000)
-       # RGSS.resources.each { |resource| resource.draw(@g) }
+       # RGSS.resources.each { |resource| resource.draw(self)}
+       # @entity.update_rect(0, 0, 0, 0)
+        unless @freezed
+          @g.entity.fill_rect(0, 0, @width, @height, @g.entity.map_rgba(0,0,0,255))
+          @g.entity.set_alpha(SDL::RLEACCEL, 0)
+          RGSS.resources.each { |resource| resource.draw(@g) }
+        end
        # @entity.fill_rect(0, 0, @width, @height, 0x000000)
-       # @entity.put @g.entity,0,0
-     	  # @entity.update_rect(0, 0, 0, 0)
-        sleeptime = @ticks + 1000 / frame_rate - SDL.get_ticks - RGSS.resources.size	
+        #@brier.entity.fill_rect(0, 0, @width, @height, @g.entity.map_rgba(0,0,0,255-@brightness))
+        @entity.put @g.entity,0,0
+        @entity.drawRect(0,0, @width, @height,@entity.map_rgb(0,0,0),true,255-@brightness)#put @brier.entity,0,0
+        @entity.update_rect(0, 0, 0, 0)
+        sleeptime = @ticks + 1000.0 / frame_rate - SDL.get_ticks
         sleep sleeptime.to_f / 1000 if sleeptime > 0
 
         @skip  = 0
         @ticks = SDL.get_ticks
-      #else
-      #  @skip += 1
-      #end
+      else
+        @skip += 1
+      end
 
       @frame_count_recent += 1
       if @frame_count_recent >= FPS_COUNT
@@ -65,7 +71,7 @@ module Graphics
     end
 
     def wait(duration)
-
+      duration.times{update}
     end
 
     def fadeout(duration)
@@ -77,18 +83,35 @@ module Graphics
     end
 
     def freeze
-
+      @freezed=true
     end
 
     def transition(duration=10, filename=nil, vague=40)
-
+      step=255/duration
+      new_frame = Bitmap.new(@width,@height)
+      RGSS.resources.sort
+      @ors=RGSS.resources   
+      new_frame.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
+      new_frame.entity.set_alpha(SDL::SRCALPHA, 255)
+      RGSS.resources.each { |resource| resource.draw(new_frame) }     
+      duration.times{|i|
+        new_frame.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,step*i)
+        #@g.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,255-step*i)
+        @entity.fill_rect(0, 0, @width, @height, 0x000000)
+        @entity.put new_frame.entity,0,0
+        #@entity.put @g.entity,0,0
+        @entity.update_rect(0, 0, 0, 0)
+        sleep 1/60.0
+      }
+      @g.entity.set_alpha(0,255);@freezed=false;@brightness=255;update
     end
 
     def snap_to_bitmap
-      result = Bitmap.new(@width, @height)
-      result.entity.set_alpha(SDL::RLEACCEL, 0)
-      RGSS.resources.each { |resource| resource.draw(result) }
-      result
+      #result = Bitmap.new(@width, @height)
+      #result.entity.set_alpha(SDL::RLEACCEL, 0)
+      #RGSS.resources.each { |resource| resource.draw(result) }
+      #result
+      return @g.clone
     end
 
     def frame_reset

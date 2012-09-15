@@ -77,15 +77,15 @@ class Window
     if @openness < 255
       base_y += @height*(255-@openness)/255 / 2
     end
-    destination.entity.put(background, base_x+4, base_y+4) if opacity > 0 and back_opacity > 0 and @height * @openness / 255 - 8 > 0
-    destination.entity.put(border, base_x, base_y) if opacity > 0
+    destination.entity.put(background(destination), base_x+4, base_y+4) if opacity > 0 and back_opacity > 0 and @height * @openness / 255 - 8 > 0
+    destination.entity.put(border(destination), base_x, base_y) if opacity > 0
 
 
     if open?
       SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding) if contents_opacity > 0
       #cursor
       if cursor_rect.width > 0 and cursor_rect.height > 0
-        destination.entity.put cursor, base_x + cursor_rect.x + padding, base_y + cursor_rect.y + padding
+        destination.entity.put cursor(destination), base_x + cursor_rect.x + padding, base_y + cursor_rect.y + padding
         #cursor_color = (255 - @cursor_status).abs
         #destination.entity.draw_rect(base_x+padding+cursor_rect.x, base_y+padding+cursor_rect.y, cursor_rect.width, cursor_rect.height, destination.entity.map_rgba(cursor_color, cursor_color, 255, 255))
       end
@@ -120,7 +120,7 @@ class Window
   end
 
 
-  def background
+  def background(g)
     width  = @width - 8
     height = @height*@openness/255-8
     result = @@background[[@windowskin.entity, width, height, @tone]]
@@ -141,7 +141,7 @@ class Window
   end
 
 
-  def border
+  def border(g)
     width  = @width
     height = @height*@openness/255
     result = @@border[[@windowskin.entity, width, height]]
@@ -177,7 +177,7 @@ class Window
   end
 
 
-  def cursor
+  def cursor(g)
     width  = cursor_rect.width
     height = cursor_rect.height
     result = @@background[[@windowskin.entity, width, height]]

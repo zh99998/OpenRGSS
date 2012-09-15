@@ -44,7 +44,12 @@ class Bitmap
   def rect
     Rect.new(0, 0, width, height)
   end
-
+  def clone
+    b=Bitmap.new(width,height)
+    b.entity = @entity.copyRect(0,0,width,height)
+    b.font=Font.clone
+    return b
+  end
   def blt(x, y, src_bitmap, src_rect, opacity=255)
     src_bitmap.entity.set_alpha(SDL::RLEACCEL, opacity)
     SDL::Surface.blit(src_bitmap.entity, src_rect.x, src_rect.y, src_rect.width, src_rect.height, @entity, x, y)
