@@ -2,6 +2,8 @@ class Window
   include RGSS::Drawable
   attr_accessor :windowskin, :contents, :cursor_rect, :active, :arrows_visible, :pause, :width, :height, :ox, :oy, :padding, :padding_bottom, :opacity, :back_opacity, :contents_opacity, :tone
   attr_reader :openness
+  @@background = {}
+  @@border     = {}
 
   def initialize(x=0, y=0, width=0, height=0)
     @x                = x
@@ -14,7 +16,7 @@ class Window
     @tone             = Tone.new
     @contents         = Bitmap.new(32, 32)
     @cursor_rect      = Rect.new
-    @back_opacity     = 255
+    @back_opacity     = 200
     @opacity          = 255
     @contents_opacity = 255
     @active           = true
@@ -63,19 +65,14 @@ class Window
       base_x += viewport.x - viewport.ox
       base_y += viewport.y - viewport.oy
     end
-
-    #background
-    destination.entity.fill_rect(base_x, base_y+@height*(255-openness)/255/2, @width, @height*openness/255, destination.entity.map_rgba(0, 0, 255, back_opacity)) if back_opacity > 0 and opacity > 0
-
-    #border
-    destination.entity.draw_rect(base_x, base_y+@height*(255-openness)/255/2, @width, @height*openness/255, destination.entity.map_rgba(255, 255, 255, opacity)) if opacity > 0
+    if @openness < 255
+      base_y += @height*(255-@openness)/255 / 2
+    end
+    destination.entity.put(background, base_x+4, base_y+4) if back_opacity > 0 and @height * @openness / 255 - 8 > 0
+    destination.entity.put(border, base_x, base_y)
 
     if open?
-      destination.entity.draw_rect(base_x+padding-1, base_y+padding-1, @width-padding*2+2, @height-padding-padding_bottom+2, destination.entity.map_rgba(255, 255, 255, opacity)) if opacity > 0
-
-      #contents
       SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding) if contents_opacity > 0
-
       #cursor
       if cursor_rect.width > 0 and cursor_rect.height > 0
         cursor_color = (255 - @cursor_status).abs
@@ -85,4 +82,98 @@ class Window
 
     destination.entity.set_clip_rect(0, 0, destination.width, destination.height) if viewport
   end
+
+  def background
+    width  = @width - 8
+    height = @height*@openness/255-8
+    result = @@background[[@windowskin.entity, width, height]]
+    return result if result
+    puts "drawing a new window background"
+    big_endian = ([1].pack("N") == [1].pack("L"))
+    if big_endian
+      rmask = 0xff000000
+      gmask = 0x00ff0000
+      bmask = 0x0000ff00
+      amask = 0x000000ff
+    else
+      rmask = 0x000000ff
+      gmask = 0x0000ff00
+      bmask = 0x00ff0000
+      amask = 0xff000000
+    end
+    result = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, 24, rmask, gmask, bmask, 0)
+
+    @windowskin.entity.set_clip_rect(0, 0, 64, 64)
+    SDL::Surface.transform_draw(@windowskin.entity, result, 0, (width).to_f/64 * 1.2, height.to_f/64, 0, 0, 0, 0, 0) #*1.2 to fix SDL bug
+
+    #TODO: improve perfomance of Tone blending
+    colors=[]
+    for i in 0..255
+      colors[i]=[[[0, i+tone.red].max, 255].min, [[0, i+tone.green].max, 255].min, [[0, i+tone.blue].max, 255].min]
+    end
+    result.lock
+    for x in 0...result.w
+      for y in 0...result.h
+        c   = result.get_rgb(result[x, y])
+        c[0]=colors[c[0]][0]
+        c[1]=colors[c[0]][1]
+        c[2]=colors[c[0]][2]
+        c   = result.map_rgb(c[0], c[1], c[2])
+        result.put_pixel(x, y, c)
+      end
+    end
+    result.unlock
+
+    @windowskin.entity.set_alpha(SDL::SRCALPHA, 255)
+    tiled(result, 0, 0, result.w, result.h, @windowskin.entity, 0, 64, 64, 64)
+    result.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL, opacity * back_opacity / 255)
+    @@background[[@windowskin.entity, width, height]] = result
+  end
+
+  def border
+    width  = @width
+    height = @height*@openness/255
+    result = @@border[[@windowskin.entity, width, height]]
+    return result if result
+    puts 'drawing a window border'
+
+    big_endian = ([1].pack("N") == [1].pack("L"))
+    if big_endian
+      rmask = 0xff000000
+      gmask = 0x00ff0000
+      bmask = 0x0000ff00
+      amask = 0x000000ff
+    else
+      rmask = 0x000000ff
+      gmask = 0x0000ff00
+      bmask = 0x00ff0000
+      amask = 0xff000000
+    end
+
+    result = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, 32, rmask, gmask, bmask, amask)
+    @windowskin.entity.set_alpha(0, 0)
+    SDL::Surface.blit(@windowskin.entity, 64, 0, 16, 16, result, 0, 0)
+    SDL::Surface.blit(@windowskin.entity, 128-16, 0, 16, 16, result, result.w-16, 0)
+    SDL::Surface.blit(@windowskin.entity, 64, 64-16, 16, 16, result, 0, result.h-16)
+    SDL::Surface.blit(@windowskin.entity, 128-16, 64-16, 16, 16, result, result.w-16, result.h-16)
+    tiled(result, 0, 16, 16, result.h-32, @windowskin.entity, 64, 16, 32, 32)
+    tiled(result, result.w-16, 16, 16, result.h-32, @windowskin.entity, 128-16, 16, 32, 32)
+    tiled(result, 16, 0, result.w-32, 16, @windowskin.entity, 64+16, 0, 32, 32)
+    tiled(result, 16, result.h-16, result.w-32, 16, @windowskin.entity, 64+16, 64-16, 32, 32)
+    @@border[[@windowskin.entity, width, height]] = result
+  end
+
+  def tiled(g, x, y, w, h, skin, x1, y1, w1, h1)
+    g.set_clip_rect(x, y, w, h)
+    xnow=x
+    while (xnow<=x+w)
+      ynow=y
+      while (ynow<=y+h)
+        SDL::Surface.blit(skin, x1, y1, w1, h1, g, xnow, ynow)
+        ynow+=h1
+      end
+      xnow+=w1
+    end
+  end
+  #SDL::Surface.blit(cache([skin, :bg, w, h]), 0, 0, w, h, g, x, y)
 end

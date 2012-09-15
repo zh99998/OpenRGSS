@@ -36,7 +36,7 @@ module RGSS
 
     def init
       SDL.init SDL::INIT_EVERYTHING
-      Graphics.entity = SDL::Screen.open(Graphics.width, Graphics.height, 0, SDL::HWSURFACE)
+      Graphics.entity = SDL::Screen.open(Graphics.width, Graphics.height, 0, SDL::HWSURFACE|SDL::HWPALETTE)
       SDL::Mixer.open(SDL::Mixer::DEFAULT_FREQUENCY, SDL::Mixer::DEFAULT_FORMAT, SDL::Mixer::DEFAULT_CHANNELS, 1536)
       SDL::TTF.init
       self.title = @title

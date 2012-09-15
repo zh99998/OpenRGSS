@@ -77,7 +77,8 @@ module Graphics
 
     def snap_to_bitmap
       result = Bitmap.new(@width, @height)
-      result.entity.put @entity, 0, 0
+      result.entity.set_alpha(SDL::RLEACCEL, 0)
+      RGSS.resources.each { |resource| resource.draw(result) }
       result
     end
 
