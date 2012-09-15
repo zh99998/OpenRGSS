@@ -77,8 +77,8 @@ class Window
     if @openness < 255
       base_y += @height*(255-@openness)/255 / 2
     end
-    destination.entity.put(background, base_x+4, base_y+4) if back_opacity > 0 and @height * @openness / 255 - 8 > 0
-    destination.entity.put(border, base_x, base_y)
+    destination.entity.put(background, base_x+4, base_y+4) if opacity > 0 and back_opacity > 0 and @height * @openness / 255 - 8 > 0
+    destination.entity.put(border, base_x, base_y) if opacity > 0
 
 
     if open?
@@ -124,20 +124,20 @@ class Window
     width  = @width - 8
     height = @height*@openness/255-8
     result = @@background[[@windowskin.entity, width, height, @tone]]
-    return result if result
+    if result.nil?
+      tonedbg = applyTone
+      result  = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, Graphics.entity)
 
-    tonedbg = applyTone
-    result  = SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, Graphics.entity)
+      @windowskin.entity.set_clip_rect(0, 0, 64, 64)
+      SDL::Surface.transform_draw(tonedbg, result, 0, (width).to_f/64 * 1.2, height.to_f/64*1.2, 0, 0, 0, 0, 0) #*1.2 to fix SDL bu
 
-
-    @windowskin.entity.set_clip_rect(0, 0, 64, 64)
-    SDL::Surface.transform_draw(tonedbg, result, 0, (width).to_f/64 * 1.2, height.to_f/64*1.2, 0, 0, 0, 0, 0) #*1.2 to fix SDL bu
-
-
-    @windowskin.entity.set_alpha(SDL::SRCALPHA, 255)
-    tiled(result, 0, 0, result.w, result.h, @windowskin.entity, 0, 64, 64, 64)
+      @windowskin.entity.set_alpha(SDL::SRCALPHA, 255)
+      tiled(result, 0, 0, result.w, result.h, @windowskin.entity, 0, 64, 64, 64)
+      result.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL, opacity * back_opacity / 255)
+      @@background[[@windowskin.entity, width, height, @tone]] = result
+    end
     result.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL, opacity * back_opacity / 255)
-    @@background[[@windowskin.entity, width, height, @tone]] = result
+    result
   end
 
 
