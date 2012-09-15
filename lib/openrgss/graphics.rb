@@ -27,13 +27,6 @@ module Graphics
       RGSS.update
       @frame_count += 1
 
-      if @fading
-        Graphics.brightness += @fading
-        if Graphics.brightness == 0 or Graphics.brightness == 255
-          @fading = nil
-        end
-      end
-
       if @skip >= 10 or SDL.get_ticks < @ticks + 1000 / frame_rate
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
         if (@ors!=RGSS.resources)
@@ -75,11 +68,15 @@ module Graphics
     end
 
     def fadeout(duration)
-      @fading = 255.to_f / 255 #duration
+      step=255/duration
+      duration.times{|i| @brightness=255-i*step;update}
+      @brightness=0
     end
 
     def fadein(duration)
-      @fading = -255.to_f / 255 ##duration
+      step=255/duration
+      duration.times{|i| @brightness=i*step;update}
+      @brightness=255
     end
 
     def freeze
@@ -87,6 +84,9 @@ module Graphics
     end
 
     def transition(duration=10, filename=nil, vague=40)
+      if (duration==0)
+        @freezed=false;return ;
+      end
       step=255/duration
       new_frame = Bitmap.new(@width,@height)
       RGSS.resources.sort
@@ -96,17 +96,21 @@ module Graphics
       RGSS.resources.each { |resource| resource.draw(new_frame) }     
       maker = Bitmap.new(@width,@height)
       duration.times{|i|
-        new_frame.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,step*i)
-        @g.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,255-step*i)
+        #new_frame.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,step*i)
+        #@g.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,255-step*i)
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
         maker.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
-        maker.entity.put new_frame.entity,0,0
         maker.entity.put @g.entity,0,0
+        new_frame.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,i*step))
+        new_frame.entity.set_alpha(SDL::SRCALPHA, i*step)
+        RGSS.resources.each { |resource| resource.draw(new_frame) }   
+        maker.entity.put new_frame.entity,0,0
+        
         @entity.put maker.entity,0,0
-        #@entity.put @g.entity,0,0
         @entity.update_rect(0, 0, 0, 0)
-        sleep 1/60.0
+        #sleep 1/60.0
       }
+      # ×¢Òâ»ØÊÕ¡­¡­
       @g.entity.set_alpha(0,255);@freezed=false;@brightness=255;update
     end
 
