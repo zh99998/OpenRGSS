@@ -68,8 +68,8 @@ class Plane
   # * Ressourcen freigeben
   #------------------------------------------------------------------------
   def dispose
-    @sprite.bitmap.dispose
-    @sprite.dispose
+    @sprite.bitmap.dispose unless @sprite.bitmap.nil? or @sprite.bitmap.disposed?
+    @sprite.dispose unless @sprite.nil? or @sprite.disposed?
   end
 
   #------------------------------------------------------------------------
