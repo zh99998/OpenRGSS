@@ -1,16 +1,16 @@
 module Graphics
-  FPS_COUNT           = 30
-  @frame_rate         = 60
-  @frame_count        = 0
-  @frame_count_recent = 0
-  @skip               = 0
-  @ticks              = 0
-  @fps_ticks          = 0
-  @brightness         = 0
-  @width              = 640
-  @height             = 480
-  @g                  = Bitmap.new(544,416)
-  @freeze = true
+  FPS_COUNT                    = 30
+  @frame_rate                  = 60
+  @frame_count                 = 0
+  @frame_count_recent          = 0
+  @skip                        = 0
+  @ticks                       = 0
+  @fps_ticks                   = 0
+  @brightness                  = 255
+  @width                       = 640
+  @height                      = 480
+  @graphics_render_target      = Bitmap.new(544,416)  # need rebuild when resize.
+  @freeze                      = false # or true?
   class <<self
     attr_reader :width, :height
     attr_accessor :entity
@@ -26,24 +26,20 @@ module Graphics
     def update
       RGSS.update
       @frame_count += 1
-
       if @skip >= 10 or SDL.get_ticks < @ticks + 1000 / frame_rate
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
-        if (@ors!=RGSS.resources)
+        if (@old_resources!=RGSS.resources)
           RGSS.resources.sort
-          @ors=RGSS.resources
+          @old_resources=RGSS.resources
         end
-       # RGSS.resources.each { |resource| resource.draw(self)}
-       # @entity.update_rect(0, 0, 0, 0)
-        unless @freezed
-          @g.entity.fill_rect(0, 0, @width, @height, @g.entity.map_rgba(0,0,0,255))
-          @g.entity.set_alpha(SDL::RLEACCEL, 0)
-          RGSS.resources.each { |resource| resource.draw(@g) }
+
+        unless @freezed                  # redraw only when !freezed
+          @graphics_render_target.entity.fill_rect(0, 0, @width, @height, @graphics_render_target.entity.map_rgba(0,0,0,255))
+          @graphics_render_target.entity.set_alpha(SDL::RLEACCEL, 0)
+          RGSS.resources.each { |resource| resource.draw(@graphics_render_target) }
         end
-       # @entity.fill_rect(0, 0, @width, @height, 0x000000)
-        #@brier.entity.fill_rect(0, 0, @width, @height, @g.entity.map_rgba(0,0,0,255-@brightness))
-        @entity.put @g.entity,0,0
-        @entity.drawRect(0,0, @width, @height,@entity.map_rgb(0,0,0),true,255-@brightness)#put @brier.entity,0,0
+        @entity.put @graphics_render_target.entity,0,0
+        @entity.drawRect(0,0, @width, @height,@entity.map_rgb(0,0,0),true,255-@brightness) # 绘制灰色覆盖。
         @entity.update_rect(0, 0, 0, 0)
         sleeptime = @ticks + 1000.0 / frame_rate - SDL.get_ticks
         sleep sleeptime.to_f / 1000 if sleeptime > 0
@@ -87,39 +83,53 @@ module Graphics
       if (duration==0)
         @freezed=false;return ;
       end
+      if (filename.nil?) # 没有渐变图形则全0
+        imgmap=Array.new(@width){Array.new(@height){255}} 
+      else               # 预处理渐变图处理成该点的优先级透明度，越小越先
+        b=Bitmap.new(filename);pfb =  b.entity.format
+        imgmap=Array.new(@width){|x|Array.new(@height){|y|[pfb.get_rgb(b.entity[x,y])[0],1].max}}
+        #TODO :回收b
+      end
       step=255/duration
       new_frame = Bitmap.new(@width,@height)
       RGSS.resources.sort
-      @ors=RGSS.resources   
+      @old_resources=RGSS.resources
       new_frame.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
       new_frame.entity.set_alpha(SDL::SRCALPHA, 255)
-      RGSS.resources.each { |resource| resource.draw(new_frame) }     
-      maker = Bitmap.new(@width,@height)
+      RGSS.resources.each { |resource| resource.draw(new_frame) }
+      # 描绘新帧到bitmap
+
+      pf  =  new_frame.entity.format
+      new_frame.entity.lock
+      picmap=Array.new(@width){|x| Array.new(@height){|y| pf.getRGBA(new_frame.entity[x,y])}}   # 这里可以用位运算加速而不用整个取出
+      new_frame.entity.unlock
+      maker = Bitmap.new(@width,@height) 
+      # 建立预合成层
+      maker.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
+      maker.entity.put @graphics_render_target.entity,0,0             # 在主图上覆盖具有一定透明度的图。
+      # 拟合渐变层
+      new_frame.entity.lock
+      @width.times{|x|@height.times{|y| 
+        if (imgmap[x][y]!=0)
+          new_frame.entity[x,y]=pf.map_rgba(picmap[x][y][0],picmap[x][y][1],picmap[x][y][2],[255/(duration/(255.0/imgmap[x][y])),255].min) 
+          #TODO : 这里的alpha在拟合一定次数后达到255，注意，这并不是RM的处理方式。
+        else
+          new_frame.entity[x,y]=pf.map_rgba(picmap[x][y][0],picmap[x][y][1],picmap[x][y][2],255)
+        end
+      }}
+      new_frame.entity.unlock
       duration.times{|i|
-        #new_frame.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,step*i)
-        #@g.entity.set_alpha(SDL::SRCALPHA|SDL::RLEACCEL,255-step*i)
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
-        maker.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
-        maker.entity.put @g.entity,0,0
-        new_frame.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,i*step))
-        new_frame.entity.set_alpha(SDL::SRCALPHA, i*step)
-        RGSS.resources.each { |resource| resource.draw(new_frame) }   
-        maker.entity.put new_frame.entity,0,0
-        
-        @entity.put maker.entity,0,0
+        maker.entity.put new_frame.entity,0,0 # alpha 合成
+        @entity.put maker.entity,0,0 
         @entity.update_rect(0, 0, 0, 0)
-        #sleep 1/60.0
       }
-      # 注意回收……
-      @g.entity.set_alpha(0,255);@freezed=false;@brightness=255;update
+      # TODO: 回收……
+      @graphics_render_target.entity.set_alpha(0,255);@freezed=false;@brightness=255;update # 恢复属性。
     end
 
     def snap_to_bitmap
-      #result = Bitmap.new(@width, @height)
-      #result.entity.set_alpha(SDL::RLEACCEL, 0)
-      #RGSS.resources.each { |resource| resource.draw(result) }
-      #result
-      return @g.clone
+      return @graphics_render_target.clone # clone方法已实现，注意回收
     end
 
     def frame_reset
