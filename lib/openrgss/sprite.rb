@@ -17,7 +17,7 @@ class Sprite
     @tone     = Tone.new
     @opacity  = 255
     @visible  = true
-    super()
+    super(viewport)
   end
 
   def bitmap=(bitmap)

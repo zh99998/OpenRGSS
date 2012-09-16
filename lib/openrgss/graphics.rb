@@ -28,9 +28,9 @@ module Graphics
       @frame_count += 1
       if @skip >= 10 or SDL.get_ticks < @ticks + 1000 / frame_rate
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
-        if (@old_resources!=RGSS.resources)
-          RGSS.resources.sort
-          @old_resources=RGSS.resources
+        if (@old_resources!=RGSS.resources)            # Maybe here can make a dirty mark
+          RGSS.resources.sort!
+          @old_resources=RGSS.resources.clone
         end
 
         unless @freezed                  # redraw only when !freezed
@@ -92,8 +92,8 @@ module Graphics
       end
       step=255/duration
       new_frame = Bitmap.new(@width,@height)
-      RGSS.resources.sort
-      @old_resources=RGSS.resources
+      RGSS.resources.sort!
+      @old_resources=RGSS.resources.clone
       new_frame.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
       new_frame.entity.set_alpha(SDL::SRCALPHA, 255)
       RGSS.resources.each { |resource| resource.draw(new_frame) }

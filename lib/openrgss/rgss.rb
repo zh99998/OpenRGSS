@@ -109,8 +109,9 @@ module RGSS
     attr_accessor :x, :y, :viewport, :created_at
     attr_reader :z, :visible
 
-    def initialize
+    def initialize(viewport)
       @created_at  = Time.now
+      @viewport    = viewport
       self.visible = @visible
     end
 
@@ -127,7 +128,7 @@ module RGSS
       end
       return false if self.z<v.z
       return false if self.z==v.z  and self.y<v.y
-      return false if self.z==v.z  and self.y<v.y and self.created_at<v.created_at
+      return false if self.z==v.z  and self.y==v.y and self.created_at<v.created_at
       return true
     end
     #$a=0

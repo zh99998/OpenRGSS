@@ -27,7 +27,7 @@ class Window
     @cursor_status    = 0
     @visible          = true
     @curcos_flash     = 0
-    super()
+    super(nil)
   end
 
 

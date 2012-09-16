@@ -1163,7 +1163,6 @@ class Tilemap
   def update
     if @need_refresh
       refresh 
-      print "a"
       @need_refresh=false
     end
     update_animation
@@ -1188,9 +1187,9 @@ class Tilemap
     if @frame_count == 0
       @frame = (@frame + 1) % 3
       if @frame > 2
-        @layers[0].bitmap = @layer_bitmaps[1]
+        @layers[0].bitmap = @layer_bitmaps[1]#.clone
       else
-        @layers[0].bitmap = @layer_bitmaps[@frame]
+        @layers[0].bitmap = @layer_bitmaps[@frame]#.clone
       end  
     end       
   end
@@ -1252,6 +1251,8 @@ class Tilemap
     @layer_bitmaps.each do |i|
       i.dispose
     end
+    # !!!DEBUG
+    print "Refresh the Tilemap\n"
     @layer_bitmaps.clear
     rect = Rect.new(0,0,32,32)
     for l in 0...3

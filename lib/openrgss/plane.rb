@@ -1,4 +1,4 @@
-##############################################################################
+﻿##############################################################################
 # ╔════════════════════════════════════════════════════════════════════════╗ #
 # ║                             ** Plane **                                ║ #
 # ╠════════════════════════════════════════════════════════════════════════╣ #
@@ -55,6 +55,7 @@ class Plane
     bmp_height = y_steps * arg_bmp.height
 
     @src_bitmap = arg_bmp
+    @sprite.bitmap.dispose unless @sprite.bitmap.nil? or @sprite.bitmap.disposed?
     @sprite.bitmap = Bitmap.new(bmp_width, bmp_height)
 
     x_steps.times { |ix| y_steps.times { |iy|
