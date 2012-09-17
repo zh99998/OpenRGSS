@@ -154,10 +154,6 @@ class Window
     if open?
       if contents_opacity > 0
         SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding)
-
-        contents.text.each do |text|
-          contents.font.entity.draw_blended_utf8(destination.entity, text[0], text[1]+base_x+padding, text[2]+base_y+padding, text[3], text[4], text[5])
-        end
       end
 
 
