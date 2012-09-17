@@ -2,7 +2,7 @@
 
 Open-source implementation of the Ruby Game Script System.
 
-== Contributing to openrgss
+== Contributing to OpenRGSS
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
@@ -15,5 +15,5 @@ Open-source implementation of the Ruby Game Script System.
 == License
 GNU LGPL v3 or later
 
-
-
+== Copyright
+Copyright © 2012 zh99998. See LICENSE.txt for further details.

@@ -1,22 +1,61 @@
-﻿##############################################################################
-# ╔════════════════════════════════════════════════════════════════════════╗ #
-# ║                             ** Plane **                                ║ #
-# ╠════════════════════════════════════════════════════════════════════════╣ #
-# ║Nachbau der Plane-Klasse aus dem Ruby Game Scripting System 2           ║ #
-# ║von REX                                                                 ║ #
-# ║Diese Klasse funktioniert wie das Original, kann es aber nicht ersetzen.║ #
-# ╠════════════════════════════════════════════════════════════════════════╣ #
-# ║                                                                        ║ #
-# ║                                                          REX, März 2011║ #
-# ╚════════════════════════════════════════════════════════════════════════╝ #
-##############################################################################
+﻿# The Plane class. Planes are special sprites that tile bitmap patterns across the entire screen and are used to display parallax backgrounds and so on.
 class Plane
-  #------------------------------------------------------------------------
-  # * Objekt Initialisierung
-  #------------------------------------------------------------------------
+
+  # Refers to the bitmap (Bitmap) used in the plane.
+  #attr_accessor :bitmap
+
+  # Refers to the viewport (Viewport) associated with the plane.
+  #attr_accessor :viewport
+
+  # The plane's visibility. If TRUE, the plane is visible. The default value is TRUE.
+  #attr_accessor :visible
+
+  # The plane's z-coordinate. The larger the value, the closer to the player the plane will be displayed.
+  #
+  # If multiple objects share the same z-coordinate, the more recently created object will be displayed closest to the player.
+  #attr_accessor :z
+
+  # The x-coordinate of the plane's starting point. Change this value to scroll the plane.
+  attr_accessor :ox
+
+  # The y-coordinate of the plane's starting point. Change this value to scroll the plane.
+  attr_accessor :oy
+
+  # The plane's x-axis zoom level. 1.0 denotes actual pixel size.
+  #attr_accessor :zoom_x
+
+  # The plane's y-axis zoom level. 1.0 denotes actual pixel size.
+  #attr_accessor :zoom_y
+
+  # The plane's opacity (0-255). Out-of-range values are automatically corrected.
+  #attr_accessor :opacity
+
+  # The plane's blending mode (0: normal, 1: addition, 2: subtraction).
+  #attr_accessor :blend_type
+
+  # The color (Color) to be blended with the plane. Alpha values are used in the blending ratio.
+  #attr_accessor :color
+
+  # The plane's color tone (Tone).
+  #attr_accessor :tone
+
+  # Creates a Plane object. Specifies a viewport (Viewport) when necessary.
   def initialize(arg_viewport=nil)
     @sprite = Sprite.new(arg_viewport)
     @src_bitmap = nil
+  end
+
+  # Frees the plane. If the plane has already been freed, does nothing.
+
+  def dispose
+    @sprite.bitmap.dispose unless @sprite.bitmap.nil? or @sprite.bitmap.disposed?
+    @sprite.dispose unless @sprite.nil? or @sprite.disposed?
+  end
+
+  # Returns TRUE if the plane has been freed.
+
+  def disposed?
+    @sprite.nil? or @sprite.disposed?
   end
 
   #------------------------------------------------------------------------
@@ -64,24 +103,8 @@ class Plane
     } }
   end
 
-  #------------------------------------------------------------------------
-  # * Ressourcen freigeben
-  #------------------------------------------------------------------------
-  def dispose
-    @sprite.bitmap.dispose unless @sprite.bitmap.nil? or @sprite.bitmap.disposed?
-    @sprite.dispose unless @sprite.nil? or @sprite.disposed?
-  end
-
-  #------------------------------------------------------------------------
-  # * Leite alle nicht definierten Methoden, wie +opacity+ oder +tone+
-  #   an den gekapselten Sprite weiter
-  #------------------------------------------------------------------------
   def method_missing(symbol, *args)
     @sprite.method(symbol).call(*args)
   end
 
-  #------------------------------------------------------------------------
-  # * Öffentliche Instanzvariablen
-  #------------------------------------------------------------------------
-  attr_reader(:ox, :oy)
 end

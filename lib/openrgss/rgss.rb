@@ -1,30 +1,44 @@
 ﻿require 'sdl'
 require 'logger'
-require 'pp'
+
+# The following built-in functions are defined in RGSS.
 
 module RGSS
 
-  Autoload_Extname = ['.png', '.jpg', '.gif', '.bmp', '.ogg', '.wma', '.mp3', '.wav', '.mid']
-  Log              = Logger.new(STDOUT)
-  @resources       = []
-  @load_path       = []
+  Log        = Logger.new(STDOUT)
+  @resources = []
+  @load_path = []
 
-  class <<self
-    attr_reader :title
+  class << self
+    # 标题
+    attr_accessor :title
+
+    # get_file的读取路径，目录字符串的数组
     attr_accessor :load_path
-    attr_accessor :rgss_version
+
+    # get_file的自动补全扩展名，以点开头的扩展名字符串的数组
+    attr_accessor :load_ext
+
+    # 屏幕上显示的资源，Drawable的数组
     attr_accessor :resources
-    attr_accessor :log
+
+    # 显示帧率
     attr_accessor :show_fps
 
-    def title=(title)
+    def title=(title) # :NODOC:
       @title = title
       SDL::WM.set_caption(title, title)
     end
 
+    # 在load_path指定的目录中查找文件，会自动补全Autoload_Extname里指定的扩展面给，默认为 .png, .jpg, .gif, .bmp, .ogg, .wma, .mp3, .wav, .mid
+    #
+    # 在Audio和Bitmap的内部自动调用
+    #
+    # 如果找不到文件，将返回filename本身
+
     def get_file(filename)
       ([nil] + RGSS.load_path).each do |directory|
-        ([''] + Autoload_Extname).each do |extname|
+        ([''] + load_ext).each do |extname|
           path = File.expand_path filename + extname, directory
           if File.exist? path
             return path
@@ -34,6 +48,8 @@ module RGSS
       filename
     end
 
+    # 初始化RGSS引擎，将会在rgss_main内部自动调用
+
     def init
       SDL.init SDL::INIT_EVERYTHING
       Graphics.entity = SDL::Screen.open(Graphics.width, Graphics.height, 0, SDL::HWSURFACE|SDL::HWPALETTE)
@@ -41,6 +57,8 @@ module RGSS
       SDL::TTF.init
       self.title = @title
     end
+
+    # 指定是否显示帧率
 
     def show_fps=(show_fps)
       if show_fps
@@ -51,6 +69,8 @@ module RGSS
 
       @show_fps = show_fps
     end
+
+    # 引擎的更新，将在Graphics.update和Input.update的内部自动调用
 
     def update
       if @show_fps and @fps != Graphics.real_fps
@@ -70,6 +90,12 @@ module RGSS
       end
     end
   end
+  self.load_ext  = ['.png', '.jpg', '.gif', '.bmp', '.ogg', '.wma', '.mp3', '.wav', '.mid']
+  self.load_path = []
+  # Evaluates the provided block one time only.
+  #
+  # Detects a reset within a block with a press of the F12 key and returns to the beginning if reset.
+  #  rgss_main { SceneManager.run }
 
   def rgss_main
     RGSS.init
@@ -81,9 +107,27 @@ module RGSS
     end
   end
 
+  # Stops script execution and only repeats screen refreshing. Defined for use in script introduction.
+  #
+  # Equivalent to the following.
+  #
+  #  loop { Graphics.update }
+
   def rgss_stop
 
   end
+
+  # Loads the data file indicated by filename and restores the object.
+  #
+  #  $data_actors = load_data("Data/Actors.rvdata2")
+  #
+  # This function is essentially the same as:
+  #
+  #  File.open(filename, "rb") { |f|
+  #    obj = Marshal.load(f)
+  #  }
+  #
+  # However, it differs in that it can load files from within encrypted archives.
 
   def load_data(filename)
     File.open(filename, "rb") { |f|
@@ -91,16 +135,37 @@ module RGSS
     }
   end
 
+  # Saves the object obj to the data file indicated by filename.
+  #
+  #  save_data($data_actors, "Data/Actors.rvdata2")
+  #
+  # This function is the same as:
+  #  File.open(filename, "wb") { |f|
+  #    Marshal.dump(obj, f)
+  #  }
+
   def save_data(obj, filename)
     File.open(filename, "wb") { |f|
       Marshal.dump(obj, f)
     }
   end
 
+  # Outputs the arguments to the message box. If a non-string object has been supplied as an argument, it will be converted into a string with to_s and output.
+  #
+  # Returns nil.
+  #
+  # <b>(Not Implemented in OpenRGSS)</b>
   def msgbox(*args)
 
   end
 
+  # Outputs obj to the message box in a human-readable format. Identical to the following code (see Object#inspect):
+  #
+  #  msgbox obj.inspect, "\n", obj2.inspect, "\n", ...
+  #
+  # Returns nil.
+  #
+  # <b>(Not Implemented in OpenRGSS)</b>
   def msgbox_p(*args)
 
   end
@@ -109,7 +174,7 @@ module RGSS
     attr_accessor :x, :y, :viewport, :created_at
     attr_reader :z, :visible
 
-    def initialize(viewport)
+    def initialize(viewport=nil)
       @created_at  = Time.now
       @viewport    = viewport
       self.visible = @visible
@@ -119,35 +184,37 @@ module RGSS
       @viewport    = viewport
       self.visible = @visible
     end
+
     def >(v)
       return false if self.viewport.nil?&&v.viewport
       unless (v.viewport.nil?)
-        return false if self.viewport.z<v.viewport.z 
-        return false if self.viewport.z==v.viewport.z and self.viewport.y<v.viewport.y
-        return false if self.viewport.z==v.viewport.z and self.viewport.y==v.viewport.y and self.viewport.created_at<v.viewport.created_at
+        return false if self.viewport.z<v.viewport.z
+        return false if self.viewport.z==v.viewport.z and self.viewport.created_at<v.viewport.created_at
       end
       return false if self.z<v.z
-      return false if self.z==v.z  and self.y<v.y
-      return false if self.z==v.z  and self.y==v.y and self.created_at<v.created_at
+      return false if self.z==v.z and self.y<v.y
+      return false if self.z==v.z and self.y==v.y and self.created_at<v.created_at
       return true
     end
+
     #$a=0
     def <=>(v)
       #print $a+=1
       return 1 if (self>v)
       return -1
     end
+
     def z=(z)
       return if z==@z
       @z = z
-      
+
       self.visible = true if @visible and !@disposed
     end
 
     def y=(y)
       return if y==@y
       @y = y
-     # RGSS.resources.sort
+      # RGSS.resources.sort
       self.visible = true if @visible and !@disposed
     end
 
@@ -169,8 +236,8 @@ module RGSS
       if @visible
         RGSS.resources.delete self
         RGSS.resources<< self
-     #   RGSS.resources.sort
-      end 
+        #   RGSS.resources.sort
+      end
 =begin
       if @visible
         RGSS.resources.each_with_index { |resource, index|
@@ -226,23 +293,4 @@ module RGSS
     end
 
   end
-
-  require_relative 'bitmap'
-  require_relative 'color'
-  require_relative 'font'
-  require_relative 'plane'
-  require_relative 'rect'
-  require_relative 'sprite'
-  require_relative 'table'
-  require_relative 'tilemap'
-  require_relative 'tone'
-  require_relative 'viewport'
-  require_relative 'window'
-  require_relative 'rgsserror'
-  require_relative 'rgssreset'
-
-  require_relative 'audio'
-  require_relative 'graphics'
-  require_relative 'input'
-  require_relative 'rpg'
 end

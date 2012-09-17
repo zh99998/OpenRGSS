@@ -1,16 +1,38 @@
 class Rect
 
+  # The x-coordinate of the rectangle's upper left corner.
   attr_accessor :x
+
+  # The y-coordinate of the rectangle's upper left corner.
   attr_accessor :y
+
+  # The rectangle's width.
   attr_accessor :width
+
+  # The rectangle's height.
   attr_accessor :height
+
+  # :call-seq:
+  # Rect.new(x, y, width, height)
+  # Rect.new
+  #
+  # Creates a new Rect object.
+  #
+  # The default values when no arguments are specified are (0, 0, 0, 0).
 
   def initialize(x=0, y=0, width=0, height=0)
     set(x, y, width, height)
   end
 
-  def set(x, y=0, width=0, height=0)
+  # :call-seq:
+  # set(x, y, width, height)
+  # set(rect)
+  #
+  # Sets all parameters at once.
+  #
+  # The second format copies all the components from a separate Rect object.
 
+  def set(x, y=0, width=0, height=0)
     if x.is_a? Rect
       rect    = x
       @x      = rect.x
@@ -29,6 +51,7 @@ class Rect
     "(#{x}, #{y}, #{width}, #{height})"
   end
 
+  # Sets all components to 0.
   def empty
     set(0, 0, 0, 0)
   end

@@ -1,21 +1,17 @@
-##############################################################################
-# ╔════════════════════════════════════════════════════════════════════════╗ #
-# ║                              ** FONT **                                ║ #
-# ╠════════════════════════════════════════════════════════════════════════╣ #
-# ║Nachbau der Font-Klasse aus dem Ruby Game Scripting System.             ║ #
-# ║Bitte beachten, dass die RGSS-Klassen im Original nur Strukturen aus    ║ #
-# ║einer anderen Sprache kapseln, weswegen dieses Script nicht mit den     ║ #
-# ║originalen RGSS-Klassen funktioniert.                                   ║ #
-# ╠════════════════════════════════════════════════════════════════════════╣ #
-# ║                                                                        ║ #
-# ║                                                          REX, März 2011║ #
-# ╚════════════════════════════════════════════════════════════════════════╝ #
-##############################################################################
+# The font class. Font is a property of the Bitmap class.
+#
+# If there is a "Fonts" folder directly under the game folder, the font files in it can be used even if they are not installed on the system.
+#
+# You can change the default values set for each component when a new Font object is created.
+#
+#  Font.default_name = ["Myriad", "Verdana"]
+#  Font.default_size = 22
+#  Font.default_bold = true
+
 class Font
   @@cache = {}
-  #------------------------------------------------------------------------
-  # * Objekt Initialisierung
-  #------------------------------------------------------------------------
+  # Creates a Font object.
+
   def initialize(arg_name=@@default_name, arg_size=@@default_size)
     @name  = arg_name
     @size  = arg_size
@@ -24,11 +20,8 @@ class Font
     @color = @@default_color
   end
 
-  #------------------------------------------------------------------------
-  # * Prüfe ob eine Schriftart installiert ist.
-  #   Dafür wird der gesammte Fontbestand im System ausgelesen und getestet
-  #   ob der Parameter dabei ist.
-  #------------------------------------------------------------------------
+  # Returns true if the specified font exists on the system.
+
   def Font.exist?(arg_font_name)
     font_key       = 'SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts'
     reg_open_keyex = Win32API.new('Advapi32', 'RegOpenKeyEx', 'lpllp', 'l')
@@ -56,16 +49,44 @@ class Font
     return font_names.include?(arg_font_name)
   end
 
+  # SDL::TTF对象
+
   def entity
     result       = @@cache[[@name, @size]] ||= SDL::TTF.open('wqy-microhei.ttc', @size)
     result.style = (@bold ? SDL::TTF::STYLE_BOLD : 0) | (@italic ? SDL::TTF::STYLE_ITALIC : 0)
     result
   end
 
-  #------------------------------------------------------------------------
-  # * Öffentliche Variablen
-  #------------------------------------------------------------------------
-  attr_accessor :name, :size, :bold, :italic, :color, :outline, :shadow, :out_color
+  # The font name. Include an array of strings to specify multiple fonts to be used in a desired order.
+  #
+  #  font.name = ["Myriad", "Verdana"]
+  # In this example, if the higher priority font Myriad does not exist on the system, the second choice Verdana will be used instead.
+  #
+  # The default is ["Verdana", "Arial", "Courier New"].
+  attr_accessor :name
+
+  # The font size. The default is 24.
+  attr_accessor :size
+
+  # The bold flag. The default is FALSE.
+  attr_accessor :bold
+
+  # The italic flag. The default is FALSE.
+  attr_accessor :italic
+
+  # The flag for outline text. The default is TRUE.
+  attr_accessor :outline
+
+  # The flag for shadow text. The default is false (RGSS3). When enabled, a black shadow will be drawn to the bottom right of the character.
+  attr_accessor :shadow
+
+  # The font color (Color). Alpha values may also be used. The default is (255,255,255,255).
+  #
+  # Alpha values are also used when drawing outline (RGSS3) and shadow text.
+  attr_accessor :color
+
+  # The outline color (Color). The default is (0,0,0,128).
+  attr_accessor :out_color
 
   class <<self
     [:name, :size, :bold, :italic, :color, :outline, :shadow, :out_color].each { |attribute|

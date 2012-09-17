@@ -1,3 +1,5 @@
+# The module that carries out graphics processing.
+
 module Graphics
   FPS_COUNT                    = 30
   @frame_rate                  = 60
@@ -14,14 +16,26 @@ module Graphics
   class <<self
     attr_reader :width, :height
     attr_accessor :entity
-    attr_accessor :frame_rate, :frame_count, :brightness
-
     attr_reader :real_fps
 
-    def resize_screen(width, height)
-      @width  = width
-      @height = height
-    end
+    # The number of times the screen is refreshed per second. The larger the value, the more CPU power is required. Normally set at 60.
+    #
+    # Changing this property is not recommended, but it can be set anywhere from 10 to 120. Out-of-range values are automatically corrected.
+    attr_accessor :frame_rate
+
+    # The screen's refresh rate count. Set this property to 0 at game start and the game play time (in seconds) can be calculated by dividing this value by the frame_rate property value.
+    attr_accessor :frame_count
+
+    # The brightness of the screen. Takes a value from 0 to 255. The fadeout, fadein, and transition methods change this value internally, as required.
+    attr_accessor :brightness
+
+    # Refreshes the game screen and advances time by 1 frame. This method must be called at set intervals.
+    #
+    #  loop do
+    #    Graphics.update
+    #    Input.update
+    #    do_something
+    #  end
 
     def update
       RGSS.update
@@ -39,7 +53,7 @@ module Graphics
           RGSS.resources.each { |resource| resource.draw(@graphics_render_target) }
         end
         @entity.put @graphics_render_target.entity,0,0
-        @entity.drawRect(0,0, @width, @height,@entity.map_rgb(0,0,0),true,255-@brightness) # »æÖÆ»ÒÉ«¸²¸Ç¡£
+        @entity.drawRect(0,0, @width, @height,@entity.map_rgb(0,0,0),true,255-@brightness) # ï¿½ï¿½ï¿½Æ»ï¿½É«ï¿½ï¿½ï¿½Ç¡ï¿½
         @entity.update_rect(0, 0, 0, 0)
         sleeptime = @ticks + 1000.0 / frame_rate - SDL.get_ticks
         sleep sleeptime.to_f / 1000 if sleeptime > 0
@@ -59,9 +73,19 @@ module Graphics
       end
     end
 
+    # Waits for the specified number of frames. Equivalent to the following:
+    #
+    #  duration.times do
+    #    Graphics.update
+    #  end
+
     def wait(duration)
       duration.times{update}
     end
+
+    # Performs a fade-out of the screen.
+    #
+    # duration is the number of frames to spend on the fade-out.
 
     def fadeout(duration)
       step=255/duration
@@ -69,26 +93,42 @@ module Graphics
       @brightness=0
     end
 
+    # Performs a fade-in of the screen.
+    #
+    # duration is the number of frames to spend on the fade-in.
+
     def fadein(duration)
       step=255/duration
       duration.times{|i| @brightness=i*step;update}
       @brightness=255
     end
 
+    # Freezes the current screen in preparation for transitions.
+    #
+    # Screen rewrites are prohibited until the transition method is called.
+
     def freeze
       @freezed=true
     end
+
+    # Carries out a transition from the screen frozen by Graphics.freeze to the current screen.
+    #
+    # duration is the number of frames the transition will last. The default is 10.
+    #
+    # filename specifies the file name of the transition graphic. When not specified, a standard fade will be used. Also automatically searches files included in RGSS-RTP and encrypted archives. File extensions may be omitted.
+    #
+    # vague sets the ambiguity of the borderline between the graphic's starting and ending points. The larger the value, the greater the ambiguity. The default is 40.
 
     def transition(duration=10, filename=nil, vague=40)
       if (duration==0)
         @freezed=false;return ;
       end
-      if (filename.nil?) # Ã»ÓÐ½¥±äÍ¼ÐÎÔòÈ«0
+      if (filename.nil?) # Ã»ï¿½Ð½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½È«0
         imgmap=Array.new(@width){Array.new(@height){255}} 
-      else               # Ô¤´¦Àí½¥±äÍ¼´¦Àí³É¸ÃµãµÄÓÅÏÈ¼¶Í¸Ã÷¶È£¬Ô½Ð¡Ô½ÏÈ
+      else               # Ô¤ï¿½ï¿½ï¿½?ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½É¸Ãµï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½Í¸ï¿½ï¿½ï¿½È£ï¿½Ô½Ð¡Ô½ï¿½ï¿½
         b=Bitmap.new(filename);pfb =  b.entity.format
         imgmap=Array.new(@width){|x|Array.new(@height){|y|[pfb.get_rgb(b.entity[x,y])[0],1].max}}
-        #TODO :»ØÊÕb
+        #TODO :ï¿½ï¿½ï¿½ï¿½b
       end
       step=255/duration
       new_frame = Bitmap.new(@width,@height)
@@ -97,22 +137,22 @@ module Graphics
       new_frame.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
       new_frame.entity.set_alpha(SDL::SRCALPHA, 255)
       RGSS.resources.each { |resource| resource.draw(new_frame) }
-      # Ãè»æÐÂÖ¡µ½bitmap
+      # ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½bitmap
 
       pf  =  new_frame.entity.format
       new_frame.entity.lock
-      picmap=Array.new(@width){|x| Array.new(@height){|y| pf.getRGBA(new_frame.entity[x,y])}}   # ÕâÀï¿ÉÒÔÓÃÎ»ÔËËã¼ÓËÙ¶ø²»ÓÃÕû¸öÈ¡³ö
+      picmap=Array.new(@width){|x| Array.new(@height){|y| pf.getRGBA(new_frame.entity[x,y])}}   # ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½
       new_frame.entity.unlock
       maker = Bitmap.new(@width,@height) 
-      # ½¨Á¢Ô¤ºÏ³É²ã
+      # ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½Ï³É²ï¿½
       maker.entity.fill_rect(0, 0, @width, @height, new_frame.entity.map_rgba(0,0,0,255))
-      maker.entity.put @graphics_render_target.entity,0,0             # ÔÚÖ÷Í¼ÉÏ¸²¸Ç¾ßÓÐÒ»¶¨Í¸Ã÷¶ÈµÄÍ¼¡£
-      # ÄâºÏ½¥±ä²ã
+      maker.entity.put @graphics_render_target.entity,0,0             # ï¿½ï¿½ï¿½ï¿½Í¼ï¿½Ï¸ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Í¸ï¿½ï¿½ï¿½Èµï¿½Í¼ï¿½ï¿½
+      # ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½
       new_frame.entity.lock
       @width.times{|x|@height.times{|y| 
         if (imgmap[x][y]!=0)
           new_frame.entity[x,y]=pf.map_rgba(picmap[x][y][0],picmap[x][y][1],picmap[x][y][2],[255/(duration/(255.0/imgmap[x][y])),255].min) 
-          #TODO : ÕâÀïµÄalphaÔÚÄâºÏÒ»¶¨´ÎÊýºó´ïµ½255£¬×¢Òâ£¬Õâ²¢²»ÊÇRMµÄ´¦Àí·½Ê½¡£
+          #TODO : ï¿½ï¿½ï¿½ï¿½ï¿½alphaï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ïµ½255ï¿½ï¿½×¢ï¿½â£¬ï¿½â²¢ï¿½ï¿½ï¿½ï¿½RMï¿½Ä´ï¿½ï¿½?Ê½ï¿½ï¿½
         else
           new_frame.entity[x,y]=pf.map_rgba(picmap[x][y][0],picmap[x][y][1],picmap[x][y][2],255)
         end
@@ -120,27 +160,48 @@ module Graphics
       new_frame.entity.unlock
       duration.times{|i|
         @entity.fill_rect(0, 0, @width, @height, 0x000000)
-        maker.entity.put new_frame.entity,0,0 # alpha ºÏ³É
+        maker.entity.put new_frame.entity,0,0 # alpha ï¿½Ï³ï¿½
         @entity.put maker.entity,0,0 
         @entity.update_rect(0, 0, 0, 0)
       }
-      # TODO: »ØÊÕ¡­¡­
-      @graphics_render_target.entity.set_alpha(0,255);@freezed=false;@brightness=255;update # »Ö¸´ÊôÐÔ¡£
+      # TODO: ï¿½ï¿½ï¿½Õ¡ï¿½ï¿½ï¿½
+      @graphics_render_target.entity.set_alpha(0,255);@freezed=false;@brightness=255;update # ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ô¡ï¿½
     end
 
+    # Gets the current game screen image as a bitmap object.
+    #
+    # This reflects the graphics that should be displayed at that point in time, without relation to the use of the freeze method.
+    #
+    # The created bitmap must be freed when it is no longer needed.
+
     def snap_to_bitmap
-      return @graphics_render_target.clone # clone·½·¨ÒÑÊµÏÖ£¬×¢Òâ»ØÊÕ
+      return @graphics_render_target.clone # cloneï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö£ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½
     end
+
+    # Resets the screen refresh timing. Call this method after a time-consuming process to prevent excessive frame skipping.
 
     def frame_reset
 
     end
 
+    # Changes the size of the game screen.
+    #
+    # Specify a value up to 640 Ã— 480 for width and height.
+
+    def resize_screen(width, height)
+      @width  = width
+      @height = height
+    end
+
+    #Plays the movie specified by filename.
+    #
+    #Returns process after waiting for playback to end.
+
     def play_movie(filename)
 
     end
 
-    def brightness=(brightness)
+    def brightness=(brightness) # :nodoc:
       @brightness = brightness < 0 ? 0 : brightness > 255 ? 255 : brightness
       #gamma       = @brightness.to_f / 255
       #SDL::Screen.set_gamma(5,1,1)

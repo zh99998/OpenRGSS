@@ -1,7 +1,86 @@
 class Window
   include RGSS::Drawable
-  attr_accessor :windowskin, :contents, :cursor_rect, :active, :arrows_visible, :pause, :width, :height, :ox, :oy, :padding, :padding_bottom, :opacity, :back_opacity, :contents_opacity, :tone
-  attr_reader :openness
+
+  # Refers to the bitmap (Bitmap) used as a window skin.
+  #
+  # Skin specifications are nearly identical to those in the previous version (VX). Resource standards: See the detailed information on window skins.
+  attr_accessor :windowskin
+
+  # Refers to the bitmap (Bitmap) used for the window's contents.
+  attr_accessor :contents
+
+  # The cursor box (Rect).
+  #
+  # Specifies a rectangle with coordinates based on the window's contents.
+  attr_accessor :cursor_rect
+
+  # Refers to the viewport (Viewport) associated with the window.
+  attr_accessor :viewport
+
+  # The cursor's blink status. If TRUE, the cursor is blinking. The default is TRUE.
+  attr_accessor :active
+
+  # The window's visibility. If TRUE, the window is visible. The default is TRUE.
+  attr_accessor :visible
+
+  # The visibility of scrolling arrows. If TRUE, the arrows are visible. The default is TRUE.
+  attr_accessor :arrows_visible
+
+  # The pause graphic's visibility. This is a symbol that appears in the message window when waiting for the player to press a button. If TRUE, the graphic is visible. The default is FALSE.
+  attr_accessor :pause
+
+  # The window's x-coordinate.
+  attr_accessor :x
+
+  # The window's y-coordinate.
+  attr_accessor :y
+
+  # The window's width.
+  attr_accessor :width
+
+  # The window's height.
+  attr_accessor :height
+
+  # The window's z-coordinate. The larger the value, the closer to the player the window will be displayed.
+  #
+  # If multiple objects share the same z-coordinate, the more recently created object will be displayed closest to the player.
+  #
+  # The default is 100 (RGSS3).
+  attr_accessor :z
+
+  # The x-coordinate of the starting point of the window's contents. Change this value to scroll the window's contents.
+  #
+  # Also affects the cursor. (RGSS3)
+  attr_accessor :ox
+
+  # The y-coordinate of the starting point of the window's contents. Change this value to scroll the window's contents.
+  #
+  # Also affects the cursor. (RGSS3)
+  attr_accessor :oy
+
+  # The size of the padding between the window's frame and contents. The default value is 12. (RGSS3)
+  attr_accessor :padding
+
+  # The padding for the bottom. Must be set after padding because it is changed along with it.
+  attr_accessor :padding_bottom
+
+  # The window's opacity (0-255). Out-of-range values are automatically corrected. The default value is 255.
+  attr_accessor :opacity
+
+  # The window background's opacity (0-255). Out-of-range values are automatically corrected. The default value is 192 (RGSS3).
+  attr_accessor :back_opacity
+
+  # The opacity of the window's contents (0-255). Out-of-range values are automatically corrected. The default value is 255.
+  attr_accessor :contents_opacity
+
+  # The openness of the window (from 0 to 255). Out-of-range values are automatically corrected.
+  #
+  # By changing this value in stages from 0 (completely closed) to 255 (completely open), it is possible to create an animation of the window opening and closing. If the openness is less than 255, the contents of the window will not be displayed. The default value is 255.
+  attr_accessor :openness
+
+  # The color (Tone) of the window's background.
+  attr_accessor :tone
+
   @@background = {}
   @@border     = {}
   @@tone       = {}
@@ -9,7 +88,7 @@ class Window
   def initialize(x=0, y=0, width=0, height=0)
     @x                = x
     @y                = y
-    @z                = 0
+    @z                = 100
     @ox               = 0
     @oy               = 0
     @width            = width
@@ -27,7 +106,7 @@ class Window
     @cursor_status    = 0
     @visible          = true
     @curcos_flash     = 0
-    super(nil)
+    super()
   end
 
 
@@ -37,10 +116,7 @@ class Window
     else
       @cursor_status = 0
     end
-
-
   end
-
 
   def move(x, y, width, height)
     @x      = x
@@ -48,7 +124,6 @@ class Window
     @width  = width
     @height = height
   end
-
 
   def open?
     openness == 255
@@ -58,7 +133,6 @@ class Window
   def close?
     openness == 0
   end
-
 
   def openness=(openness)
     @openness = openness < 0 ? 0 : openness > 255 ? 255 : openness
@@ -70,9 +144,9 @@ class Window
     base_x = @x-@ox
     base_y = @y-@oy
     if viewport
-      destination.entity.set_clip_rect(viewport.x, viewport.y, viewport.width, viewport.height)
-      base_x += viewport.x - viewport.ox
-      base_y += viewport.y - viewport.oy
+      destination.entity.set_clip_rect(viewport.rect.x, viewport.rect.y, viewport.rect.width, viewport.rect.height)
+      base_x += viewport.rect.x - viewport.ox
+      base_y += viewport.rect.y - viewport.oy
     end
     if @openness < 255
       base_y += @height*(255-@openness)/255 / 2

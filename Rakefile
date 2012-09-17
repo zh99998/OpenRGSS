@@ -2,6 +2,7 @@ require 'rake'
 require 'rubygems'
 require 'rubygems/package_task'
 require 'rake/clean'
+require 'rdoc/task'
 
 PKG_VERSION = 0.1
 PKG_FILES = %w(lib README.txt LICENSE.txt) 
@@ -31,4 +32,9 @@ end
 Gem::PackageTask.new(spec) do |pkg|
   pkg.need_zip = true
   pkg.need_tar = true
+end
+
+Rake::RDocTask.new do |rd|
+  rd.main = "README.txt"
+  rd.rdoc_files.include("README.txt", "LICENSE.txt", "lib/**/*.rb")
 end
