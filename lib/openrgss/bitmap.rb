@@ -3,7 +3,7 @@
 # Sprites (Sprite) and other objects must be used to display bitmaps onscreen.
 
 class Bitmap
-  attr_accessor :font, :entity
+  attr_accessor :font, :entity, :text
 
   # :call-seq:
   #  Bitmap.new(filename)
@@ -35,6 +35,7 @@ class Bitmap
       SDL::Surface.new(SDL::SWSURFACE|SDL::SRCALPHA, width, height, 32, rmask, gmask, bmask, amask)
     end
     @font   = Font.new
+    @text = []
   end
 
   # Frees the bitmap. If the bitmap has already been freed, does nothing.
@@ -237,7 +238,8 @@ class Bitmap
       x += (width - @font.entity.text_size(str)[0]) / 2
     end
 
-    @font.entity.draw_solid_utf8(@entity, str, x, y, @font.color.red, @font.color.green, @font.color.blue)
+    @text << [str, x, y, @font.color.red, @font.color.green, @font.color.blue]
+    #@font.entity.draw_solid_utf8(@entity, str, x, y, @font.color.red, @font.color.green, @font.color.blue)
   end
 
   # Gets the box (Rect) used when drawing the string str with the draw_text method. Does not include the outline portion (RGSS3) and the angled portions of italicized text.

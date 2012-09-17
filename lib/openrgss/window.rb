@@ -20,9 +20,6 @@ class Window
   # The cursor's blink status. If TRUE, the cursor is blinking. The default is TRUE.
   attr_accessor :active
 
-  # The window's visibility. If TRUE, the window is visible. The default is TRUE.
-  attr_accessor :visible
-
   # The visibility of scrolling arrows. If TRUE, the arrows are visible. The default is TRUE.
   attr_accessor :arrows_visible
 
@@ -154,9 +151,16 @@ class Window
     destination.entity.put(background(destination), base_x+4, base_y+4) if opacity > 0 and back_opacity > 0 and @height * @openness / 255 - 8 > 0
     destination.entity.put(border(destination), base_x, base_y) if opacity > 0
 
-
     if open?
-      SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding) if contents_opacity > 0
+      if contents_opacity > 0
+        SDL::Surface.blit(@contents.entity, 0, 0, @width-padding*2, @height-padding-padding_bottom, destination.entity, base_x+padding, base_y+padding)
+
+        contents.text.each do |text|
+          contents.font.entity.draw_blended_utf8(destination.entity, text[0], text[1]+base_x+padding, text[2]+base_y+padding, text[3], text[4], text[5])
+        end
+      end
+
+
       #cursor
       if cursor_rect.width > 0 and cursor_rect.height > 0
         destination.entity.put cursor(destination), base_x + cursor_rect.x + padding, base_y + cursor_rect.y + padding
