@@ -8,3 +8,4 @@ PLATFORMS
 
 DEPENDENCIES
   rubysdl
+  rubysdl-mswin32

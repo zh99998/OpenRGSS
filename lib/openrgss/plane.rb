@@ -58,30 +58,22 @@ class Plane
     @sprite.nil? or @sprite.disposed?
   end
 
-  #------------------------------------------------------------------------
-  # * Auslenkung auf der X Achse setzen
-  #------------------------------------------------------------------------
+
   def ox=(val)
     @sprite.ox= (val % (@src_bitmap.nil? ? 1 : @src_bitmap.width))
   end
 
-  #------------------------------------------------------------------------
-  # * Auslenkung auf der Y Achse setzen
-  #------------------------------------------------------------------------
+
   def oy=(val)
     @sprite.oy= (val % (@src_bitmap.nil? ? 1 : @src_bitmap.height))
   end
 
-  #------------------------------------------------------------------------
-  # * Mach das Bitmap öffentlich
-  #------------------------------------------------------------------------
+
   def bitmap
     @src_bitmap
   end
 
-  #------------------------------------------------------------------------
-  # * Lege ein Bitmap fest
-  #------------------------------------------------------------------------
+
   def bitmap=(arg_bmp)
     vp_width = @sprite.viewport.nil? ? \
                             Graphics.width : @sprite.viewport.rect.width

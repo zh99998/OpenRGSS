@@ -156,7 +156,13 @@ module RGSS
   #
   # <b>(Not Implemented in OpenRGSS)</b>
   def msgbox(*args)
-
+    if RUBY_PLATFORM['mingw'] or RUBY_PLATFORM['mswin']
+      require 'dl'
+      @@messagebox ||= DL::CFunc.new(DL.dlopen('user32')['MessageBoxA'], DL::TYPE_LONG, 'MessageBox')
+      @@messagebox.call([0, args.collect { |arg| arg.to_s }.join("\n"), RGSS.title, 0].pack('L!ppL!').unpack('L!*'))
+    else
+      puts args
+    end
   end
 
   # Outputs obj to the message box in a human-readable format. Identical to the following code (see Object#inspect):
@@ -167,7 +173,7 @@ module RGSS
   #
   # <b>(Not Implemented in OpenRGSS)</b>
   def msgbox_p(*args)
-
+    msgbox args.collect { |obj| obj.inspect }.join("\n")
   end
 
   module Drawable

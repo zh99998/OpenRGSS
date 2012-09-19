@@ -4,25 +4,31 @@ require 'rubygems/package_task'
 require 'rake/clean'
 require 'rdoc/task'
 
-PKG_VERSION = 0.1
-PKG_FILES = %w(lib README.txt LICENSE.txt) 
+PKG_VERSION = '0.1.4'
+PKG_FILES = %w(README.txt LICENSE.txt) + Dir.glob('lib/**/*.rb')
 
 spec = Gem::Specification.new do |s|
   s.name = 'openrgss'
   s.version = PKG_VERSION
   s.summary = "Open-source implementation of the Ruby Game Script System."
   s.description = "Open-source implementation of the Ruby Game Script System."
-  s.platform = Gem::Platform::RUBY
   s.required_ruby_version = '>= 1.9'
   s.requirements << 'SDL'
-  s.add_dependency 'rubysdl'
+
+  if RUBY_PLATFORM['mingw'] or RUBY_PLATFORM['mswin']
+    s.platform = Gem::Platform::CURRENT
+    s.add_dependency 'rubysdl-mswin32-1.9'
+  else
+    s.platform = Gem::Platform::RUBY
+    s.add_dependency 'rubysdl'
+  end
 
   s.files = PKG_FILES
-  s.require_path = ['lib']
-  
-  #s.rdoc_options
+
   s.has_rdoc = true
   s.extra_rdoc_files = ['README.txt', 'LICENSE.txt']
+  s.rdoc_options << "--main" << "README.txt"
+  s.rdoc_options << "--encoding" << "UTF-8"
 
   s.author = 'zh99998'
   s.email = 'zh99998@gmail.com'
@@ -31,10 +37,5 @@ end
 
 Gem::PackageTask.new(spec) do |pkg|
   pkg.need_zip = true
-  pkg.need_tar = true
-end
-
-Rake::RDocTask.new do |rd|
-  rd.main = "README.txt"
-  rd.rdoc_files.include("README.txt", "LICENSE.txt", "lib/**/*.rb")
+  pkg.zip_command = '7z a -tzip' if RUBY_PLATFORM['mingw'] or RUBY_PLATFORM['mswin']
 end
