@@ -19,7 +19,7 @@ module Audio
     # Also automatically searches files included in RGSS-RTP. File extensions may be omitted.
 
     def bgm_play(filename, volume=100, pitch=100, pos=0)
-      SDL::Mixer.play_music SDL::Mixer::Music.load(RGSS.get_file(filename)), -1
+      SDL::Mixer.play_music SDL::Mixer::Music.load(RGSS.get_file(filename)), -1 rescue puts($!)
     end
 
     # Stops BGM playback.
@@ -47,7 +47,7 @@ module Audio
     # Also automatically searches files included in RGSS-RTP. File extensions may be omitted.
 
     def bgs_play(filename, volume=100, pitch=100, pos=0)
-      @bgs_channel = SDL::Mixer.play_channel(-1, SDL::Mixer::Wave.load(RGSS.get_file(filename)), -1)
+      @bgs_channel = SDL::Mixer.play_channel(-1, SDL::Mixer::Wave.load(RGSS.get_file(filename)), -1) rescue puts($!)
     end
 
     # Stops BGS playback.
@@ -75,7 +75,7 @@ module Audio
     # When ME is playing, the BGM will temporarily stop. The timing of when the BGM restarts is slightly different from RGSS1.
 
     def me_play(filename, volume=100, pitch=100)
-      @me_channel = SDL::Mixer.play_channel(-1, SDL::Mixer::Wave.load(RGSS.get_file(filename)), 0)
+      @me_channel = SDL::Mixer.play_channel(-1, SDL::Mixer::Wave.load(RGSS.get_file(filename)), 0) rescue puts($!)
     end
 
     # Stops ME playback.
@@ -97,7 +97,7 @@ module Audio
     # When attempting to play the same SE more than once in a very short period, they will automatically be filtered to prevent choppy playback
 
     def se_play(filename, volume=100, pitch=100)
-      @se_channel = SDL::Mixer.play_channel(-1, SDL::Mixer::Wave.load(RGSS.get_file(filename)), 0)
+      @se_channel = SDL::Mixer.play_channel(-1, SDL::Mixer::Wave.load(RGSS.get_file(filename)), 0) rescue puts($!)
     end
 
     # Stops all SE playback.

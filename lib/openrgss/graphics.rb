@@ -9,7 +9,7 @@ module Graphics
   @brightness             = 255
   @width                  = 640
   @height                 = 480
-  @graphics_render_target = Bitmap.new(544, 416) # need rebuild when resize.
+  @graphics_render_target = Bitmap.new(@width, @height) # need rebuild when resize.
   @freeze                 = false                # or true?
   class <<self
     attr_reader :width, :height
