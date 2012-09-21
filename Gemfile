@@ -5,5 +5,5 @@ platform :ruby do
 end
 
 platforms :mswin, :mingw do
-  gem 'rubysdl-mswin32'
+  gem 'rubysdl-mswin32-19'
 end

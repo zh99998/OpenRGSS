@@ -4,7 +4,7 @@ require 'rubygems/package_task'
 require 'rake/clean'
 require 'rdoc/task'
 
-PKG_VERSION = '0.1.4'
+PKG_VERSION = '0.1.5'
 PKG_FILES = %w(README.txt LICENSE.txt) + Dir.glob('lib/**/*.rb')
 
 spec = Gem::Specification.new do |s|
